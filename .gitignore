@@ -1,0 +1,16 @@
+# Caches do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Pastas ocultas de configuração local do Databricks (DABs)
+.databricks/
+.bundle/
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos de variáveis de ambiente (onde ficam senhas locais)
+.env
