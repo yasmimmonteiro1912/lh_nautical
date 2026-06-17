@@ -1,0 +1,32 @@
+bundle:
+  name: grupo_2_nautical
+
+targets:
+  dev:
+    default: true
+
+resources:
+  jobs:
+    job_ingestao_jdbc_bronze:
+      name: "[Grupo 2] Pipeline Ingestao Bronze JDBC"
+      schedule:
+        quartz_cron_expression: "0 0 1 * * ?"
+        timezone_id: "America/Sao_Paulo"
+      
+      environments:
+        - environment_key: serverless_env_v5
+          spec:
+            environment_version: "5"
+            
+      tasks:
+        - task_key: rodar_ingestao_sql_server
+          environment_key: serverless_env_v5
+          spark_python_task:
+            python_file: src/bronze/ingestao_tabelas.py
+            parameters: [
+              "--host", "{{secrets/grupo2_cofre/db_host}}",
+              "--port", "{{secrets/grupo2_cofre/db_port}}",
+              "--database", "{{secrets/grupo2_cofre/db_name}}",
+              "--user", "{{secrets/grupo2_cofre/db_user}}",
+              "--password", "{{secrets/grupo2_cofre/db_pass}}"
+            ]
