@@ -125,38 +125,47 @@ def process_table(spark, jdbc_url, connection_properties, table_name):
 
 
 def main():
-
     args = get_args()
 
-    logger.info(f"HOST={args.host}")
-    logger.info(f"PORT={args.port}")
-    logger.info(f"DATABASE={args.database}")
-    logger.info(f"USER={args.user}")
-
     spark = SparkSession.builder.getOrCreate()
+
+    def resolver_secret(texto_param):
+        if texto_param and texto_param.startswith("{{secrets/"):
+            clean = texto_param.replace("{{secrets/", "").replace("}}", "")
+            scope, key = clean.split("/")
+            from pyspark.dbutils import DBUtils
+            return DBUtils(spark).secrets.get(scope=scope, key=key)
+        return texto_param
+
+    # Resolvendo os parâmetros (se forem chaves do cofre, viram os dados reais na memória)
+    db_host = resolver_secret(args.host)
+    db_port = resolver_secret(args.port)
+    db_name = resolver_secret(args.database)
+    db_user = resolver_secret(args.user)
+    db_pass = resolver_secret(args.password)
+
+    # Logs estruturados com os dados já resolvidos (com a senha protegida)
+    logger.info(f"HOST={db_host}")
+    logger.info(f"PORT={db_port}")
+    logger.info(f"DATABASE={db_name}")
+    logger.info(f"USER={db_user}")
 
     spark.sql(
         "CREATE DATABASE IF NOT EXISTS bronze"
     )
 
     jdbc_url = (
-        f"jdbc:sqlserver://{args.host}:{args.port};"
-        f"database={args.database};"
+        f"jdbc:sqlserver://{db_host}:{db_port};"
+        f"database={db_name};"
         f"encrypt=true;"
         f"trustServerCertificate=true;"
     )
 
     connection_properties = {
-        "user": args.user,
-        "password": args.password,
+        "user": db_user,
+        "password": db_pass,
         "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver"
     }
-
-    # ==========================================================
-    # Mudança: Lista isolada em variável única
-    # Motivo principal: Facilitar futura externalização
-    # para YAML/JSON
-    # ==========================================================
 
     tabelas = [
         "addresses",
@@ -190,7 +199,6 @@ def main():
     )
 
     for tabela in tabelas:
-
         process_table(
             spark,
             jdbc_url,
@@ -198,7 +206,7 @@ def main():
             tabela
         )
 
-    logger.info("🔥 TESTE YASMIM - VERSAO NOVA")
+    logger.info("🔥 TESTE YASMIM - VERSAO NOVA COM SECRETS RESOLVIDOS!")
 
 
 if __name__ == "__main__":
