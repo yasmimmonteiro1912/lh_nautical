@@ -32,6 +32,7 @@ def get_args():
     parser.add_argument("--database", required=True)
     parser.add_argument("--user", required=True)
     parser.add_argument("--password", required=True)
+    parser.add_argument("--target_tables", required=False, default=None)
 
     return parser.parse_args()
 
@@ -194,6 +195,11 @@ def main():
         "variant_attribute_values"
     ]
 
+    # Aplicação da interseção lógica para fins de FinOps e Governança
+    if args.target_tables:
+        lista_permitida = [t.strip() for t in args.target_tables.split(",")]
+        tabelas = [t for t in tabelas if t in lista_permitida]
+
     logger.info(
         f"📋 Total de tabelas a processar: {len(tabelas)}"
     )
@@ -211,5 +217,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    
