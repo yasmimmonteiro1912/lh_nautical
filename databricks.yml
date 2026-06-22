@@ -30,3 +30,9 @@ resources:
               "--user", "{{secrets/grupo2_cofre/db_user}}",
               "--password", "{{secrets/grupo2_cofre/db_pass}}"
             ]
+
+        - task_key: rodar_ingestao_cambio_bacen
+          environment_key: serverless_env_v5
+          spark_python_task:
+            python_file: src/bronze/ingestao_cambio.py
+            parameters: []
