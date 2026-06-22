@@ -167,32 +167,19 @@ def main():
         "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver"
     }
 
-    tabelas = [
-        "addresses",
-        "attributes",
-        "brands",
-        "categories",
-        "customers",
-        "employees",
-        "fiscal_invoices",
-        "goods_receipt_items",
-        "goods_receipts",
-        "locations",
-        "order_items",
-        "orders",
-        "payments",
-        "product_suppliers",
-        "product_variants",
-        "products",
-        "purchase_order_items",
-        "purchase_orders",
-        "return_items",
-        "returns",
-        "stock_levels",
-        "stock_movements",
-        "suppliers",
-        "variant_attribute_values"
-    ]
+    # ==========================================================================
+    # TESTE IASMIN - MAPEAMENTO DINÂMICO DE METADADOS
+    # ==========================================================================
+    # MAPEAMENTO DINÂMICO: Consulta o catálogo da origem para descobrir e ingerir 
+    # novas tabelas automaticamente, eliminando a manutenção manual do código.
+    logger.info("🔍 Consultando o INFORMATION_SCHEMA do SQL Server...")
+    query_tabelas = "(SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE') as t"
+    
+    df_metadados = spark.read.jdbc(url=jdbc_url, table=query_tabelas, properties=connection_properties)
+    
+    tabelas = [row['TABLE_NAME'] for row in df_metadados.collect()]
+    logger.info(f"📋 [TESTE IASMIN] Descobertas {len(tabelas)} tabelas prontas para processamento.")
+    # ==========================================================================
 
     logger.info(
         f"📋 Total de tabelas a processar: {len(tabelas)}"
