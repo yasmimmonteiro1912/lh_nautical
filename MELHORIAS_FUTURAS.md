@@ -21,7 +21,7 @@ Eficiência de TI: Centraliza a regra de captura, reduzindo o esforço de susten
 | **Camada Silver** | Uma nova tabela será ingerida na Bronze, mas fica estagnada ali.  | Atualizar o pipeline da Silver para mapear as regras de negócio e limpeza para que os dados sigam viagem. |
 | **Evolução de Schema** | Se uma coluna for deletada na origem, a Bronze atualiza, mas a Silver e os relatórios que dependem dela quebram. | Implementar testes de contrato de dados (*Data Contracts*) antes da fase de ingestão. |
 | **Performance (Spark)** | Uso consecutivo de `df.count()` (logs) e `df.write` (gravação) gerou **17.4s** de lentidão devido ao *Lazy Evaluation* (leitura dupla no SQL Server). | Avaliar o uso de `.cache()` logo após a leitura da origem para manter os dados na memória do cluster.
-
+![alt text](image.png)
 
 ## 2.[Próxima melhoria]
 Sugestão de tópico: Ingerir na bronze uma tabela de taxa de cambio.
