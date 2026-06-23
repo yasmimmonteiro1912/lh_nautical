@@ -12,10 +12,20 @@ pipelines:
           caches:
             - pip-cache
           script:
+            # 1. Instala utilitários de sistema indispensáveis
             - apt-get update && apt-get install -y curl unzip
+            
+            # 2. Atualiza ferramentas de build Python
             - pip install --upgrade pip wheel
+            
+            # 3. Instala a CLI oficial do Databricks
             - curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-            - rm -f /usr/local/bin/databricks
+            
+            # 4. Valida se ela está respondendo (Agora vai!)
             - databricks -v
+            
+            # 5. Valida a estrutura do seu projeto
             - databricks bundle validate
+            
+            # 6. Faz o deploy dos seus recursos no Databricks
             - databricks bundle deploy
