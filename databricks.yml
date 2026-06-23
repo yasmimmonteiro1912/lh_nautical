@@ -28,5 +28,12 @@ resources:
               "--port", "{{secrets/grupo2_cofre/db_port}}",
               "--database", "{{secrets/grupo2_cofre/db_name}}",
               "--user", "{{secrets/grupo2_cofre/db_user}}",
-              "--password", "{{secrets/grupo2_cofre/db_pass}}"
+              "--password", "{{secrets/grupo2_cofre/db_pass}}",
+              "--target_tables", "addresses,attributes,brands,categories,customers,employees,fiscal_invoices,goods_receipt_items,goods_receipts,locations,order_items,orders,payments,product_suppliers,product_variants,products,purchase_order_items,purchase_orders,return_items,returns,stock_levels,stock_movements,suppliers,variant_attribute_values"
             ]
+
+        - task_key: rodar_ingestao_cambio_bacen
+          environment_key: serverless_env_v5
+          spark_python_task:
+            python_file: src/bronze/ingestao_cambio.py
+            parameters: [] 
