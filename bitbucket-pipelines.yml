@@ -1,0 +1,21 @@
+image: python:3.11-slim
+
+definitions:
+  caches:
+    pip-cache: ~/.cache/pip
+
+pipelines:
+  branches:
+    feature/setup-pipeline: 
+      - step:
+          name: "Validar e Implantar Databricks Asset Bundle"
+          caches:
+            - pip-cache
+          script:
+            - apt-get update && apt-get install -y curl unzip
+            - pip install --upgrade pip wheel
+            - curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+            - rm -f /usr/local/bin/databricks
+            - databricks -v
+            - databricks bundle validate
+            - databricks bundle deploy
