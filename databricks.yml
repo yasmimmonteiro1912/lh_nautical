@@ -9,6 +9,13 @@ resources:
   jobs:
     job_ingestao_jdbc_bronze:
       name: "[Grupo 2] Pipeline Ingestao Bronze JDBC"
+      
+      email_notifications:
+        on_failure:
+          - yasmim.monteiro@indicium.ai
+          - erivan.oliveira@indicium.ai
+          - iasmin.santiago@indicium.ai
+     
       schedule:
         quartz_cron_expression: "0 0 1 * * ?"
         timezone_id: "America/Sao_Paulo"
