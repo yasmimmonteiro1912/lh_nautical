@@ -44,3 +44,11 @@ resources:
           spark_python_task:
             python_file: src/bronze/ingestao_cambio.py
             parameters: [] 
+        
+        - task_key: rodar_testes_qualidade_bronze
+          environment_key: serverless_env_v5
+          depends_on:
+            - task_key: rodar_ingestao_sql_server
+            - task_key: rodar_ingestao_cambio_bacen
+          spark_python_task:
+            python_file: tests/test_bronze_quality.py
