@@ -49,10 +49,37 @@ O arquivo `databricks.yml` declara o workflow e os recursos necessários para o 
 | :--- | :--- | :--- | :--- |
 | **1** | `rodar_ingestao_sql_server` | `ingestao_tabelas.py` | Recebe as credenciais via Databricks Secrets (`grupo2_cofre`) e injeta uma lista restrita de **24 tabelas** de negócio para controle de FinOps e Governança. |
 | **2** | `rodar_ingestao_cambio_bacen` | `ingestao_cambio.py` | Executado sem parâmetros de data para forçar a inicialização automática do *Smart Watermark*. |
+| **3** | `rodar_suite_data_quality` | `qualidade_dados.py` | Orquestração centralizada com abordagem *Fail-Late*. Avalia a presença, estrutura (linhagem) e volumetria de todas as tabelas geradas nas etapas anteriores, agindo como barreira de segurança para as camadas subsequentes. |
 
 > 🔒 **Segurança:** O script intercepta automaticamente strings que utilizam o padrão `{{secrets/scope/key}}` e resolve as credenciais em tempo de execução via `dbutils.secrets`, omitindo exibições de senhas nos logs do cluster.
 
 ---
+## 🧪 Framework de Qualidade de Dados (Data Quality)
+
+O projeto conta com um framework automatizado de **Data Quality** desenvolvido em PySpark. Ele executa validações físicas, estruturais e de governança logo após as ingestões, atuando como uma barreira de segurança para garantir a integridade dos dados antes que fiquem disponíveis para as camadas subsequentes (*Silver* e *Gold*).
+
+* **Arquivo:** `src/bronze/qualidade_dados.py` (ou o caminho correspondente no seu repositório)
+* **Mecanismo de Descoberta:** Totalmente dinâmico via Metastore (`spark.catalog.listTables`). O motor identifica automaticamente as tabelas ingeridas e persistidas na camada Bronze em tempo de execução, eliminando a necessidade de manutenção ou atualização manual do arquivo de testes ao adicionar novas origens.
+
+### Detalhamento da Suíte de Testes (Asserts)
+
+1. **Presença de Tabelas no Catálogo (`test_presenca_de_tabelas`)**
+   * **Utilidade:** Valida se existem objetos físicos gerados dentro do esquema alvo.
+   * **O que previne:** Mitiga falsos positivos de sucesso em processos de ETL que falham de forma silenciosa e terminam sem gerar nenhuma tabela. Evita quebras em cascata por tentativa de leitura de esquemas inexistentes.
+
+2. **Estrutura e Linhagem Técnica (`test_estrutura_e_auditoria`)**
+   * **Utilidade:** Inspeciona o esquema das tabelas em busca de colunas obrigatórias de governança (como `ingestion_timestamp`, `dh_ingestao` ou `ingestao_timestamp`).
+   * **O que previne:** Degradação da governança de dados (*Data Lineage*). Garante que nenhum dado seja exposto no Lakehouse sem o carimbo temporal que identifica exatamente quando o registro foi extraído da origem.
+
+3. **Volumetria de Dados e Carga Zerada (`test_volumetria_dados`)**
+   * **Utilidade:** Avalia a integridade física através de uma contagem de linhas (`count()`), validando se os conectores (JDBC/APIs) realmente trouxeram registros válidos.
+   * **O que previne:** Evita que falhas de rede, quebras de conectores ou aplicação de filtros incorretos façam com que dados históricos consolidados sejam sobrescritos por tabelas vazias (volumetria zerada).
+
+### 🏗️ Estratégia de Resiliência e FinOps
+
+* **Abordagem *Fail-Late* (Falha Tardia):** Cada tabela é auditada de forma isolada dentro de blocos `try/except`. Caso uma tabela apresente inconsistências, a falha é registrada internamente, mas o script continua validando as tabelas remanescentes. Isso garante um relatório completo de erros em uma única execução do Job.
+* **Bloqueio Downstream:** Ao final da validação, se houver qualquer inconformidade no relatório consolidado, o script dispara uma interrupção crítica (`RuntimeError`). Isso altera o status do Job do Databricks para **FAILED**, impedindo automaticamente que os dados inconsistentes avancem no pipeline.
+* **Práticas de FinOps:** O script utiliza o método `SparkSession.builder.getOrCreate()`, o que permite o reaproveitamento otimizado do cluster Serverless ativo, reduzindo o tempo de inicialização e o consumo desnecessário de créditos computacionais.
 
 ## 🔄 Esteira de Integração e Entrega Contínuas (CI/CD)
 
