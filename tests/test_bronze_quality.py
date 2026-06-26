@@ -192,5 +192,44 @@ def construir_e_rodar_suite():
 
 
 if __name__ == "__main__":
-    # Inicialização do orquestrador central
-    construir_e_rodar_suite()
+    import sys 
+
+    try:
+        # Inicialização do orquestrador central do framework
+        construir_e_rodar_suite()
+        
+    except Exception as e:
+        """
+        ==============================================================================
+        GESTÃO DE EXCEÇÕES, OBSERVABILIDADE E DISPARO DE ALERTAS NO WORKFLOWS
+        ==============================================================================
+        CONCEITO ARQUITETURAL (Fail-Late & Explicit Exit Code):
+        O framework utiliza uma estratégia de falha tardia para consolidar todas as 
+        inconformidades de dados em um relatório final.
+        
+        POR QUE COMBINAR LOGGER.CRITICAL + SYSTEMEXIT COM MENSAGEM?
+        1. Rastreabilidade na UI (Databricks Web): O 'logger.critical' com 'exc_info=True' 
+           salva o traceback completo e estruturado do erro de qualidade no Standard Error (stderr) 
+           do cluster, essencial para auditorias futuras na tela do Databricks.
+           
+        2. Visibilidade no CLI (Terminal Local): Como o CLI 'databricks bundle run' oculta 
+           logs de erros comuns ao falhar, usamos 'raise SystemExit(mensagem)'. Isso 
+           carimba o tipo do erro (ex: RuntimeError) e a lista de tabelas afetadas 
+           diretamente na saída principal do terminal, evitando buscas cegas nos logs.
+           
+        3. Automação de Alertas (E-mail): O SystemExit força o fechamento do processo e 
+            garante o código de saída correto para o Databricks Workflows, que assume o status 'FAILED', 
+            percebe o colapso da tarefa  e dispara as notificações de e-mail do 'databricks.yml' 
+            sem violar a documentação do README.
+        ==============================================================================
+        """
+        # 1. Registra a falha estruturada com o traceback completo para a interface web
+        logger.critical("💥 Falha crítica de Data Quality detectada na Camada Bronze:", exc_info=True)
+        
+        # 2. Formata a mensagem combinando o tipo do erro (ex: RuntimeError) com o texto real
+        mensagem_customizada = f"{type(e).__name__}: {str(e)}"
+        
+        # 3. Encerra o sistema com erro de forma controlada: força o CLI a printar a mensagem no terminal e disparar o e-mail
+        raise SystemExit(mensagem_customizada) from None
+    
+    
