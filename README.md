@@ -49,7 +49,7 @@ O arquivo `databricks.yml` declara o workflow e os recursos necessários para o 
 | :--- | :--- | :--- | :--- |
 | **1** | `rodar_ingestao_sql_server` | `ingestao_tabelas.py` | Recebe as credenciais via Databricks Secrets (`grupo2_cofre`) e injeta uma lista restrita de **24 tabelas** de negócio para controle de FinOps e Governança. |
 | **2** | `rodar_ingestao_cambio_bacen` | `ingestao_cambio.py` | Executado sem parâmetros de data para forçar a inicialização automática do *Smart Watermark*. |
-| **3** | `rodar_suite_data_quality` | `qualidade_dados.py` | Orquestração centralizada com abordagem *Fail-Late*. Avalia a presença, estrutura (linhagem) e volumetria de todas as tabelas geradas nas etapas anteriores, agindo como barreira de segurança para as camadas subsequentes. |
+| **3** | `rodar_testes_qualidade_bronze` | `test_bronze_quality.py` | Orquestração centralizada com abordagem *Fail-Late*. Avalia a presença, estrutura (linhagem) e volumetria de todas as tabelas geradas nas etapas anteriores, agindo como barreira de segurança para as camadas subsequentes. |
 
 > 🔒 **Segurança:** O script intercepta automaticamente strings que utilizam o padrão `{{secrets/scope/key}}` e resolve as credenciais em tempo de execução via `dbutils.secrets`, omitindo exibições de senhas nos logs do cluster.
 
@@ -58,7 +58,7 @@ O arquivo `databricks.yml` declara o workflow e os recursos necessários para o 
 
 O projeto conta com um framework automatizado de **Data Quality** desenvolvido em PySpark. Ele executa validações físicas, estruturais e de governança logo após as ingestões, atuando como uma barreira de segurança para garantir a integridade dos dados antes que fiquem disponíveis para as camadas subsequentes (*Silver* e *Gold*).
 
-* **Arquivo:** `src/bronze/qualidade_dados.py` (ou o caminho correspondente no seu repositório)
+* **Arquivo:** `tests/test_bronze_quality.py` (ou o caminho correspondente no seu repositório)
 * **Mecanismo de Descoberta:** Totalmente dinâmico via Metastore (`spark.catalog.listTables`). O motor identifica automaticamente as tabelas ingeridas e persistidas na camada Bronze em tempo de execução, eliminando a necessidade de manutenção ou atualização manual do arquivo de testes ao adicionar novas origens.
 
 ### Detalhamento da Suíte de Testes (Asserts)
