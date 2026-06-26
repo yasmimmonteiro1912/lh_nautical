@@ -78,7 +78,7 @@ O projeto conta com um framework automatizado de **Data Quality** desenvolvido e
 ### 🏗️ Estratégia de Resiliência e FinOps
 
 * **Abordagem *Fail-Late* (Falha Tardia):** Cada tabela é auditada de forma isolada dentro de blocos `try/except`. Caso uma tabela apresente inconsistências, a falha é registrada internamente, mas o script continua validando as tabelas remanescentes. Isso garante um relatório completo de erros em uma única execução do Job.
-* **Bloqueio Downstream:** Ao final da validação, se houver qualquer inconformidade no relatório consolidado, o script dispara uma interrupção crítica (`RuntimeError`). Isso altera o status do Job do Databricks para **FAILED**, impedindo automaticamente que os dados inconsistentes avancem no pipeline.
+* **Bloqueio Downstream:** Ao final da validação, se houver qualquer inconformidade no relatório consolidado, o script gera um relatório de falhas e força um encerramento sistêmico via SystemExit. Isso carimba o erro real no terminal, altera o status do Job do Databricks para FAILED e ativa o gatilho de e-mails de alerta para o time, impedindo automaticamente que os dados inconsistentes avancem no pipeline.
 * **Práticas de FinOps:** O script utiliza o método `SparkSession.builder.getOrCreate()`, o que permite o reaproveitamento otimizado do cluster Serverless ativo, reduzindo o tempo de inicialização e o consumo desnecessário de créditos computacionais.
 
 ## 🔄 Esteira de Integração e Entrega Contínuas (CI/CD)
