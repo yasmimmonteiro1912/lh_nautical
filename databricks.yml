@@ -29,7 +29,7 @@ resources:
         - task_key: rodar_ingestao_sql_server
           environment_key: serverless_env_v5
           spark_python_task:
-            python_file: src/bronze/ingestao_tabelas.py
+            python_file: lh_nautical_bronze/src/ingestao_tabelas.py
             parameters: [
               "--host", "{{secrets/grupo2_cofre/db_host}}",
               "--port", "{{secrets/grupo2_cofre/db_port}}",
@@ -42,7 +42,7 @@ resources:
         - task_key: rodar_ingestao_cambio_bacen
           environment_key: serverless_env_v5
           spark_python_task:
-            python_file: src/bronze/ingestao_cambio.py
+            python_file: lh_nautical_bronze/src/ingestao_cambio.py
             parameters: [] 
         
         - task_key: rodar_testes_qualidade_bronze
@@ -51,4 +51,4 @@ resources:
             - task_key: rodar_ingestao_sql_server
             - task_key: rodar_ingestao_cambio_bacen
           spark_python_task:
-            python_file: tests/test_bronze_quality.py
+            python_file: lh_nautical_bronze/tests/test_bronze_quality.py
