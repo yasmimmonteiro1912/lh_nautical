@@ -1,0 +1,30 @@
+[sqlfluff]
+# Usar o dialeto do Databricks
+dialect = databricks
+
+# Usar o dbt como templater para entender as macros (ex: {{ source(...) }})
+templater = dbt
+
+# Ignorar a pasta de logs e a pasta dbt_packages (se houver)
+exclude_rules = None
+ignore = templating
+
+[sqlfluff:templater:dbt]
+project_dir = .
+
+# ===================================================================
+# REGRA DE OURO DA EQUIPE: LEADING COMMAS
+# ===================================================================
+[sqlfluff:layout:type:comma]
+# Força a vírgula a ficar no início da linha (leading)
+line_position = leading
+spacing_before = touch
+spacing_after = space
+
+[sqlfluff:rules:capitalisation.keywords]
+# Padroniza as palavras-chave (SELECT, FROM, etc) para minúsculo
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.identifiers]
+# Padroniza nomes de colunas e tabelas para minúsculo
+capitalisation_policy = lower

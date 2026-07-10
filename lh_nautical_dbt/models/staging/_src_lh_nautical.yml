@@ -1,0 +1,10 @@
+version: 2
+
+sources:
+  - name: lh_nautical
+    database: workspace  # Definido apenas uma vez (DRY)
+    schema: bronze       # Definido apenas uma vez (DRY)
+    tables:
+      - name: addresses
+        description: "Tabela de endereços dos clientes."
+      
