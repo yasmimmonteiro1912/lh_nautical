@@ -359,6 +359,7 @@ sources:
               - not_null
           - name: is_primary
             description: "Sinalizador booleano (bit). O valor 'true' indica o endereço principal do cliente, critério obrigatório para evitar a duplicação do grão na dim_customer."
+
       - name: attributes
         description: "Tabela contendo os metadados dos atributos dinâmicos das variantes de produtos (Modelo EAV)."
         columns:
@@ -393,3 +394,24 @@ sources:
             description: "Indicador lógico do tipo bit (0 ou 1) que determina se a marca está ativa no catálogo comercial."
             tests:
               - not_null
+              
+      - name: categories
+        description: "Tabela transacional contendo as categorias e subcategorias dos produtos. Essa estrutura será higienizada e aplanada na dim_product_variant para eliminar o modelo snowflake e corrigir os desvios de metadados da origem."
+        columns:
+          - name: id
+            description: "Chave primária (Business Key) identificadora da categoria no sistema transacional de origem."
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: "Nome de exibição da categoria (Ex: Equipamentos, Cabos, Motores, Coletes Salva-Vidas)."
+            tests:
+              - not_null
+          - name: slug
+            description: "Texto amigável (slug) associado à categoria para indexação ou rotas de e-commerce."
+          - name: parent_category_id
+            description: "Chave estrangeira de auto-relacionamento que aponta para a categoria pai. Fundamental para mapear a árvore hierárquica e transformá-la em colunas planas na Gold."
+          - name: is_active
+            description: "Indicador lógico do tipo bit (0 ou 1) que determina se a categoria e suas respectivas subcategorias estão ativas no catálogo."
+            tests:
+              - not_null        
