@@ -7,4 +7,189 @@ sources:
     tables:
       - name: addresses
         description: "Tabela de endereços dos clientes."
+
+      - name: purchase_order_items
+        description: "Tabela contendo os itens individuais e condições comerciais de cada pedido de compra."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do item do pedido de compra."
+            tests:
+              - unique
+              - not_null
+          - name: purchase_order_id
+            description: "Chave estrangeira que vincula o item ao cabeçalho do pedido de compra (purchase_orders)."
+          - name: product_variant_id
+            description: "Chave estrangeira que identifica a variante específica do produto comprado."
+          - name: quantity_ordered
+            description: "Métrica numérica que indica a quantidade total de unidades solicitadas do produto."
+          - name: unit_cost
+            description: "Custo unitário do item registrado na moeda nativa original do pedido."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
       
+      - name: purchase_orders
+        description: "Tabela de cabeçalho dos pedidos de compra, contendo informações gerais de prazos, moedas e chaves de negócio."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do pedido de compra."
+            tests:
+              - unique
+              - not_null
+          - name: po_number
+            description: "Número identificador operacional do pedido de compra."
+          - name: supplier_id
+            description: "Chave estrangeira que vincula o pedido ao fornecedor (suppliers)."
+          - name: buyer_id
+            description: "Chave estrangeira que vincula o pedido ao funcionário comprador (dim_employee)."
+          - name: destination_location_id
+            description: "Chave estrangeira que indica a filial de destino do estoque (dim_location)."
+          - name: status
+            description: "Status do ciclo de vida do pedido (ex: draft, sent, received, cancelled)."
+          - name: currency
+            description: "Código da moeda utilizada nas condições comerciais do pedido (ex: BRL, USD)."
+          - name: placed_at
+            description: "Carimbo de data/hora que indica quando o pedido foi oficialmente emitido."
+          - name: expected_delivery_at
+            description: "Data prevista para a entrega das mercadorias nas docas."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+
+      - name: return_items
+        description: "Tabela contendo os itens individuais devolvidos pelos clientes no processo de logística reversa."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do item devolvido."
+            tests:
+              - unique
+              - not_null
+          - name: return_id
+            description: "Chave estrangeira que vincula o item ao cabeçalho da devolução (returns)."
+          - name: order_item_id
+            description: "Chave estrangeira que vincula o item devolvido ao item original do pedido de venda (order_items)."
+          - name: action
+            description: "Ação aplicada ao item devolvido (ex: refund para reembolso, exchange para troca)."
+          - name: exchange_variant_id
+            description: "Chave estrangeira que identifica a nova variante do produto enviado em caso de troca física."
+          - name: quantity
+            description: "Métrica que indica a quantidade de unidades que foram devolvidas pelo cliente."
+          - name: unit_refund_amount
+            description: "Métrica financeira que indica o valor unitário de reembolso a ser estornado."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+
+      - name: returns
+        description: "Tabela de cabeçalho das devoluções, registrando os motivos, clientes e filiais envolvidas na logística reversa."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única da devolução."
+            tests:
+              - unique
+              - not_null
+          - name: return_number
+            description: "Número operacional identificador da devolução."
+          - name: customer_id
+            description: "Chave estrangeira que vincula a devolução ao cliente (dim_customer)."
+          - name: order_id
+            description: "Chave estrangeira que vincula a devolução ao pedido original de venda (orders)."
+          - name: received_at_location_id
+            description: "Chave estrangeira que identifica a filial física que recebeu o produto devolvido (dim_location)."
+          - name: status
+            description: "Status atual do processo de devolução (ex: open, completed, cancelled)."
+          - name: reason
+            description: "O motivo alegado pelo cliente para realizar a devolução do produto."
+          - name: created_at
+            description: "Carimbo de data/hora que indica quando a devolução foi aberta."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+
+      - name: stock_levels
+        description: "Tabela contendo os níveis de estoque atuais por variante de produto e filial."
+        columns:
+          - name: product_variant_id
+            description: "Chave estrangeira que vincula o registro à variante do produto (dim_product_variant)."
+            tests:
+              - not_null
+          - name: location_id
+            description: "Chave estrangeira que vincula o registro à localização ou filial física (dim_location)."
+            tests:
+              - not_null
+          - name: quantity_on_hand
+            description: "Métrica que indica a quantidade física de saldo disponível em estoque em tempo real."
+          - name: reorder_point
+            description: "Ponto de ressuprimento. Nível mínimo de estoque que dispara o gatilho para novas compras."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+
+      - name: stock_movements
+        description: "Tabela contendo o histórico atômico e o diário de auditoria de todas as movimentações físicas de estoque."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do registro de movimentação de estoque."
+            tests:
+              - unique
+              - not_null
+          - name: product_variant_id
+            description: "Chave estrangeira que vincula o movimento à variante do produto (dim_product_variant)."
+          - name: location_id
+            description: "Chave estrangeira que aponta para o armazém ou loja física onde o estoque oscilou."
+          - name: employee_id
+            description: "Chave estrangeira que identifica o funcionário operador responsável pelo ajuste (dim_employee)."
+          - name: movement_type
+            description: "Tipo de movimentação realizada (ex: return_in, return_out, manual_adjustment)."
+          - name: reference_table
+            description: "Identifica a tabela ou documento do ERP que disparou o gatilho físico (ex: orders, returns, goods_receipts)."
+          - name: reference_id
+            description: "ID do documento de origem contido na tabela de referência."
+          - name: notes
+            description: "Justificativas textuais e observações inseridas pelo operador de pátio."
+          - name: quantity
+            description: "Métrica de quantidade de itens movimentados (pode aceitar valores fracionados ou decimais)."
+          - name: occurred_at
+            description: "Carimbo de data/hora que indica o momento exato em que a movimentação física aconteceu."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+
+      - name: suppliers
+        description: "Tabela mestre contendo o cadastro transacional e os dados fiscais de todos os fornecedores nacionais e internacionais."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do fornecedor no sistema de origem."
+            tests:
+              - unique
+              - not_null
+          - name: legal_name
+            description: "Razão Social oficial do fornecedor cadastrado."
+          - name: trade_name
+            description: "Nome Fantasia comercial do parceiro fornecedor."
+          - name: tax_id
+            description: "Código de identificação fiscal do fornecedor (ex: CNPJ, VAT)."
+          - name: tax_id_type
+            description: "Tipo de documento fiscal utilizado para a validação (ex: CNPJ ou VAT)."
+          - name: contact_name
+            description: "Nome do ponto de contato/vendedor ou responsável no fornecedor."
+          - name: email
+            description: "E-mail oficial de contato para compras e abastecimento."
+          - name: phone
+            description: "Telefone de contato do fornecedor."
+          - name: country
+            description: "País de origem ou sede onde o fornecedor está operando."
+          - name: is_active
+            description: "Flag booleana indicando se o cadastro do fornecedor está ativo na plataforma."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+
+      - name: variant_attribute_values
+        description: "Tabela contendo os valores dos atributos dinâmicos das variantes de produtos (Modelo EAV), como cor, tamanho e voltagem."
+        columns:
+          - name: product_variant_id
+            description: "Chave estrangeira que liga o atributo à variante do produto correspondente (product_variants)."
+            tests:
+              - not_null
+          - name: attribute_id
+            description: "Chave estrangeira que identifica o tipo de atributo (ex: 1 para cor, 2 para tamanho, 3 para comprimento)."
+            tests:
+              - not_null
+          - name: value
+            description: "O valor textual ou numérico bruto da especificação do produto que será pivotado na Gold."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
