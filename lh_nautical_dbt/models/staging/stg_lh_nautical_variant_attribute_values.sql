@@ -8,10 +8,10 @@ with source_data as (
 , renamed as (
 
     select
-        product_variant_id
-        , attribute_id
-        , value as attribute_value
-        , ingestion_timestamp
+        cast(product_variant_id as int) as product_variant_id
+        , cast(attribute_id as int) as attribute_id
+        , cast(value as string) as attribute_value
+        , cast(ingestion_timestamp as timestamp) as ingestion_timestamp
     from source_data
 
 )
