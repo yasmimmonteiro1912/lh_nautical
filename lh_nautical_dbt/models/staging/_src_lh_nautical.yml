@@ -375,3 +375,21 @@ sources:
             description: "Tipo de dado do valor do atributo (Ex: text, number, boolean) utilizado para guiar o parse de dados na camada Gold."
             tests:
               - not_null
+      - name: brands
+        description: "Tabela transacional contendo as marcas dos produtos. Os dados serão desnormalizados diretamente para a dim_product_variant."
+        columns:
+          - name: id
+            description: "Chave primária (Business Key) da marca no sistema transacional de origem."
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: "Nome comercial da marca (Ex: Yamaha Marine, Garmin, Mercury Marine)."
+            tests:
+              - not_null
+          - name: country
+            description: "Sigla de dois caracteres correspondente ao país de origem da marca. Pode conter valores nulos para registros não informados."
+          - name: is_active
+            description: "Indicador lógico do tipo bit (0 ou 1) que determina se a marca está ativa no catálogo comercial."
+            tests:
+              - not_null
