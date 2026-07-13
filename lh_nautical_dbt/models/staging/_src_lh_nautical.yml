@@ -359,3 +359,19 @@ sources:
               - not_null
           - name: is_primary
             description: "Sinalizador booleano (bit). O valor 'true' indica o endereço principal do cliente, critério obrigatório para evitar a duplicação do grão na dim_customer."
+      - name: attributes
+        description: "Tabela contendo os metadados dos atributos dinâmicos das variantes de produtos (Modelo EAV)."
+        columns:
+          - name: id
+            description: "Chave primária (Business Key) identificadora do atributo no sistema de origem."
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: "Nome do atributo dinâmico (Ex: color, size, power_hp, voltage_v, weight_kg, waterproof, material)."
+            tests:
+              - not_null
+          - name: data_type
+            description: "Tipo de dado do valor do atributo (Ex: text, number, boolean) utilizado para guiar o parse de dados na camada Gold."
+            tests:
+              - not_null
