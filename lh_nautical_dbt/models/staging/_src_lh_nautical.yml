@@ -394,7 +394,7 @@ sources:
             description: "Indicador lógico do tipo bit (0 ou 1) que determina se a marca está ativa no catálogo comercial."
             tests:
               - not_null
-              
+
       - name: categories
         description: "Tabela transacional contendo as categorias e subcategorias dos produtos. Essa estrutura será higienizada e aplanada na dim_product_variant para eliminar o modelo snowflake e corrigir os desvios de metadados da origem."
         columns:
@@ -414,4 +414,38 @@ sources:
           - name: is_active
             description: "Indicador lógico do tipo bit (0 ou 1) que determina se a categoria e suas respectivas subcategorias estão ativas no catálogo."
             tests:
-              - not_null        
+              - not_null
+              
+      - name: customers
+        description: "Tabela transacional contendo o cadastro bruto de clientes (Pessoas Físicas e Jurídicas) da LH Nautical."
+        columns:
+          - name: id
+            description: "Chave primária (Business Key) identificadora única do cliente no sistema de origem."
+            tests:
+              - unique
+              - not_null
+          - name: person_type
+            description: "Identificador do tipo de pessoa (Ex: PF para Pessoa Física, PJ para Pessoa Jurídica)."
+            tests:
+              - not_null
+          - name: legal_name
+            description: "Razão social ou nome completo do cliente."
+            tests:
+              - not_null
+          - name: trade_name
+            description: "Nome fantasia do cliente (relevante para clientes PJ)."
+          - name: tax_id
+            description: "Documento de identificação fiscal (CPF para pessoa física ou CNPJ para pessoa jurídica)."
+            tests:
+              - unique
+              - not_null
+          - name: state_registration
+            description: "Inscrição Estadual do cliente (quando aplicável para PJ)."
+          - name: email
+            description: "Endereço de e-mail principal do cliente para contato e envio de notas fiscais."
+          - name: phone
+            description: "Número de telefone ou celular cadastrado do cliente."
+          - name: is_active
+            description: "Indicador lógico do tipo bit (0 ou 1) que determina se o cadastro do cliente está ativo."
+            tests:
+              - not_null                
