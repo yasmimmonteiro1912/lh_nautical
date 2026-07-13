@@ -320,3 +320,42 @@ sources:
           - name: termination_date
             description: "Data de desligamento do funcionário. Campo nulo indica que o colaborador continua ativo."
             
+      
+      - name: addresses
+        description: "Tabela que armazena os endereços de entrega e faturamento dos clientes. Os dados geográficos serão desnormalizados diretamente para a dim_customer."
+        columns:
+          - name: id
+            description: "Chave primária (Business Key) identificadora do endereço no sistema transacional."
+            tests:
+              - unique
+              - not_null
+          - name: customer_id
+            description: "Chave estrangeira que conecta o endereço ao respectivo cliente."
+            tests:
+              - not_null
+          - name: address_type
+            description: "Classificação do tipo de endereço (Ex: shipping, billing, residential)."
+          - name: postal_code
+            description: "Código postal / CEP do endereço."
+          - name: street
+            description: "Logradouro / Nome da rua."
+          - name: number
+            description: "Número do imóvel."
+          - name: complement
+            description: "Complemento do endereço (bloco, apartamento, etc.)."
+          - name: district
+            description: "Bairro."
+          - name: city
+            description: "Cidade (será mapeada como primary_city no DW)."
+            tests:
+              - not_null
+          - name: state
+            description: "Sigla do estado/UF com 2 caracteres (será mapeada como primary_state no DW)."
+            tests:
+              - not_null
+          - name: country
+            description: "Sigla do país com 2 caracteres (será mapeada como primary_country no DW)."
+            tests:
+              - not_null
+          - name: is_primary
+            description: "Sinalizador booleano (bit). O valor 'true' indica o endereço principal do cliente, critério obrigatório para evitar a duplicação do grão na dim_customer."
