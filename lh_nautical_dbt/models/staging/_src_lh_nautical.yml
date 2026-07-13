@@ -285,3 +285,38 @@ sources:
             description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
             tests:
               - not_null
+      
+      - name: employees
+        description: "Tabela transacional contendo o cadastro bruto de funcionários, vendedores e estoquistas da empresa."
+        columns:
+          - name: id
+            description: "Chave primária (Business Key) identificadora do funcionário no sistema de origem."
+            tests:
+              - unique
+              - not_null
+          - name: full_name
+            description: "Nome completo do funcionário."
+            tests:
+              - not_null
+          - name: cpf
+            description: "Cadastro de Pessoa Física (CPF) do colaborador. Dado sensível sujeito a regras de LGPD."
+            tests:
+              - unique
+              - not_null
+          - name: email
+            description: "Endereço de e-mail corporativo do funcionário."
+          - name: role
+            description: "Cargo ocupado pelo colaborador (Ex: manager, stockist, salesperson)."
+            tests:
+              - not_null
+          - name: primary_location_id
+            description: "Chave estrangeira que identifica a localização/filial principal onde o funcionário atua."
+            tests:
+              - not_null
+          - name: hire_date
+            description: "Data em que o funcionário foi oficialmente contratado pela empresa."
+            tests:
+              - not_null
+          - name: termination_date
+            description: "Data de desligamento do funcionário. Campo nulo indica que o colaborador continua ativo."
+            
