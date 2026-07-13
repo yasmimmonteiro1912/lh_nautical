@@ -18,14 +18,24 @@ sources:
               - not_null
           - name: purchase_order_id
             description: "Chave estrangeira que vincula o item ao cabeçalho do pedido de compra (purchase_orders)."
+            tests:
+              - not_null
           - name: product_variant_id
             description: "Chave estrangeira que identifica a variante específica do produto comprado."
+            tests:
+              - not_null
           - name: quantity_ordered
             description: "Métrica numérica que indica a quantidade total de unidades solicitadas do produto."
+            tests:
+              - not_null
           - name: unit_cost
             description: "Custo unitário do item registrado na moeda nativa original do pedido."
+            tests:
+              - not_null
           - name: ingestion_timestamp
             description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
       
       - name: purchase_orders
         description: "Tabela de cabeçalho dos pedidos de compra, contendo informações gerais de prazos, moedas e chaves de negócio."
@@ -37,22 +47,38 @@ sources:
               - not_null
           - name: po_number
             description: "Número identificador operacional do pedido de compra."
+            tests:
+              - not_null
           - name: supplier_id
             description: "Chave estrangeira que vincula o pedido ao fornecedor (suppliers)."
+            tests:
+              - not_null
           - name: buyer_id
             description: "Chave estrangeira que vincula o pedido ao funcionário comprador (dim_employee)."
+            tests:
+              - not_null
           - name: destination_location_id
             description: "Chave estrangeira que indica a filial de destino do estoque (dim_location)."
+            tests:
+              - not_null
           - name: status
             description: "Status do ciclo de vida do pedido (ex: draft, sent, received, cancelled)."
+            tests:
+              - not_null
           - name: currency
             description: "Código da moeda utilizada nas condições comerciais do pedido (ex: BRL, USD)."
+            tests:
+              - not_null
           - name: placed_at
             description: "Carimbo de data/hora que indica quando o pedido foi oficialmente emitido."
+            tests:
+              - not_null
           - name: expected_delivery_at
-            description: "Data prevista para a entrega das mercadorias nas docas."
+            description: "Data prevista para a entrega das mercadorias nas docas (Aceita nulos no banco)."
           - name: ingestion_timestamp
             description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
 
       - name: return_items
         description: "Tabela contendo os itens individuais devolvidos pelos clientes no processo de logística reversa."
@@ -64,18 +90,30 @@ sources:
               - not_null
           - name: return_id
             description: "Chave estrangeira que vincula o item ao cabeçalho da devolução (returns)."
+            tests:
+              - not_null
           - name: order_item_id
             description: "Chave estrangeira que vincula o item devolvido ao item original do pedido de venda (order_items)."
+            tests:
+              - not_null
           - name: action
             description: "Ação aplicada ao item devolvido (ex: refund para reembolso, exchange para troca)."
+            tests:
+              - not_null
           - name: exchange_variant_id
-            description: "Chave estrangeira que identifica a nova variante do produto enviado em caso de troca física."
+            description: "Chave estrangeira que identifica a nova variante do produto enviado em caso de troca física (Aceita nulos no banco)."
           - name: quantity
             description: "Métrica que indica a quantidade de unidades que foram devolvidas pelo cliente."
+            tests:
+              - not_null
           - name: unit_refund_amount
             description: "Métrica financeira que indica o valor unitário de reembolso a ser estornado."
+            tests:
+              - not_null
           - name: ingestion_timestamp
             description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
 
       - name: returns
         description: "Tabela de cabeçalho das devoluções, registrando os motivos, clientes e filiais envolvidas na logística reversa."
@@ -87,23 +125,43 @@ sources:
               - not_null
           - name: return_number
             description: "Número operacional identificador da devolução."
+            tests:
+              - not_null
           - name: customer_id
             description: "Chave estrangeira que vincula a devolução ao cliente (dim_customer)."
+            tests:
+              - not_null
           - name: order_id
             description: "Chave estrangeira que vincula a devolução ao pedido original de venda (orders)."
+            tests:
+              - not_null
           - name: received_at_location_id
             description: "Chave estrangeira que identifica a filial física que recebeu o produto devolvido (dim_location)."
+            tests:
+              - not_null
           - name: status
             description: "Status atual do processo de devolução (ex: open, completed, cancelled)."
+            tests:
+              - not_null
           - name: reason
-            description: "O motivo alegado pelo cliente para realizar a devolução do produto."
+            description: "O motivo alegado pelo cliente para realizar a devolução do produto (Aceita nulos no banco)."
           - name: created_at
             description: "Carimbo de data/hora que indica quando a devolução foi aberta."
+            tests:
+              - not_null
           - name: ingestion_timestamp
             description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
 
       - name: stock_levels
         description: "Tabela contendo os níveis de estoque atuais por variante de produto e filial."
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments: 
+                combination_of_columns:
+                  - product_variant_id
+                  - location_id
         columns:
           - name: product_variant_id
             description: "Chave estrangeira que vincula o registro à variante do produto (dim_product_variant)."
@@ -115,10 +173,14 @@ sources:
               - not_null
           - name: quantity_on_hand
             description: "Métrica que indica a quantidade física de saldo disponível em estoque em tempo real."
+            tests:
+              - not_null
           - name: reorder_point
-            description: "Ponto de ressuprimento. Nível mínimo de estoque que dispara o gatilho para novas compras."
+            description: "Ponto de ressuprimento. Nível mínimo de estoque que dispara o gatilho para novas compras (Aceita nulos no banco)."
           - name: ingestion_timestamp
             description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
 
       - name: stock_movements
         description: "Tabela contendo o histórico atômico e o diário de auditoria de todas as movimentações físicas de estoque."
@@ -130,24 +192,36 @@ sources:
               - not_null
           - name: product_variant_id
             description: "Chave estrangeira que vincula o movimento à variante do produto (dim_product_variant)."
+            tests:
+              - not_null
           - name: location_id
             description: "Chave estrangeira que aponta para o armazém ou loja física onde o estoque oscilou."
+            tests:
+              - not_null
           - name: employee_id
-            description: "Chave estrangeira que identifica o funcionário operador responsável pelo ajuste (dim_employee)."
+            description: "Chave estrangeira que identifica o funcionário operador responsável pelo ajuste (Aceita nulos no banco)."
           - name: movement_type
             description: "Tipo de movimentação realizada (ex: return_in, return_out, manual_adjustment)."
+            tests:
+              - not_null
           - name: reference_table
-            description: "Identifica a tabela ou documento do ERP que disparou o gatilho físico (ex: orders, returns, goods_receipts)."
+            description: "Identifica a tabela ou documento do ERP que disparou o gatilho físico (Aceita nulos no banco)."
           - name: reference_id
-            description: "ID do documento de origem contido na tabela de referência."
+            description: "ID do documento de origem contido na tabela de referência (Aceita nulos no banco)."
           - name: notes
-            description: "Justificativas textuais e observações inseridas pelo operador de pátio."
+            description: "Justificativas textuais e observações inseridas pelo operador de pátio (Aceita nulos no banco)."
           - name: quantity
             description: "Métrica de quantidade de itens movimentados (pode aceitar valores fracionados ou decimais)."
+            tests:
+              - not_null
           - name: occurred_at
             description: "Carimbo de data/hora que indica o momento exato em que a movimentação física aconteceu."
+            tests:
+              - not_null
           - name: ingestion_timestamp
             description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
 
       - name: suppliers
         description: "Tabela mestre contendo o cadastro transacional e os dados fiscais de todos os fornecedores nacionais e internacionais."
@@ -159,27 +233,41 @@ sources:
               - not_null
           - name: legal_name
             description: "Razão Social oficial do fornecedor cadastrado."
+            tests:
+              - not_null
           - name: trade_name
-            description: "Nome Fantasia comercial do parceiro fornecedor."
+            description: "Nome Fantasia comercial do parceiro fornecedor (Aceita nulos no banco)."
           - name: tax_id
-            description: "Código de identificação fiscal do fornecedor (ex: CNPJ, VAT)."
+            description: "Código de identificação fiscal do fornecedor (Aceita nulos no banco)."
           - name: tax_id_type
-            description: "Tipo de documento fiscal utilizado para a validação (ex: CNPJ ou VAT)."
+            description: "Tipo de documento fiscal utilizado para a validação (Aceita nulos no banco)."
           - name: contact_name
-            description: "Nome do ponto de contato/vendedor ou responsável no fornecedor."
+            description: "Nome do ponto de contato/vendedor ou responsável no fornecedor (Aceita nulos no banco)."
           - name: email
-            description: "E-mail oficial de contato para compras e abastecimento."
+            description: "E-mail oficial de contato para compras e abastecimento (Aceita nulos no banco)."
           - name: phone
-            description: "Telefone de contato do fornecedor."
+            description: "Telefone de contato do fornecedor (Aceita nulos no banco)."
           - name: country
             description: "País de origem ou sede onde o fornecedor está operando."
+            tests:
+              - not_null
           - name: is_active
             description: "Flag booleana indicando se o cadastro do fornecedor está ativo na plataforma."
+            tests:
+              - not_null
           - name: ingestion_timestamp
             description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
 
       - name: variant_attribute_values
         description: "Tabela contendo os valores dos atributos dinâmicos das variantes de produtos (Modelo EAV), como cor, tamanho e voltagem."
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments: 
+                combination_of_columns:
+                  - product_variant_id
+                  - attribute_id
         columns:
           - name: product_variant_id
             description: "Chave estrangeira que liga o atributo à variante do produto correspondente (product_variants)."
@@ -191,5 +279,9 @@ sources:
               - not_null
           - name: value
             description: "O valor textual ou numérico bruto da especificação do produto que será pivotado na Gold."
+            tests:
+              - not_null
           - name: ingestion_timestamp
             description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
