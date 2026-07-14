@@ -9,10 +9,10 @@ renamed as (
 
     select
         cast(id as int) as employee_id
-        , cast(full_name as varchar) as employee_full_name
-        , cast(cpf as varchar) as employee_cpf
-        , cast(email as varchar) as employee_email
-        , cast(role as varchar) as employee_role
+        , cast(full_name as string) as employee_full_name
+        , cast(cpf as string) as employee_cpf
+        , cast(email as string) as employee_email
+        , cast(role as string) as employee_role
         , cast(primary_location_id as int) as primary_location_id
         , cast(hire_date as date) as hire_date
         , cast(termination_date as date) as termination_date

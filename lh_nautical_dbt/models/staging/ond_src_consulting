@@ -1,0 +1,662 @@
+version: 2
+
+sources:
+  - name: lh_nautical
+    database: workspace  # Definido apenas uma vez (DRY)
+    schema: bronze       # Definido apenas uma vez (DRY)
+    tables:
+      - name: addresses
+        description: "Tabela de endereços dos clientes."
+
+      - name: purchase_order_items
+        description: "Tabela contendo os itens individuais e condições comerciais de cada pedido de compra."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do item do pedido de compra."
+            tests:
+              - unique
+              - not_null
+          - name: purchase_order_id
+            description: "Chave estrangeira que vincula o item ao cabeçalho do pedido de compra (purchase_orders)."
+            tests:
+              - not_null
+          - name: product_variant_id
+            description: "Chave estrangeira que identifica a variante específica do produto comprado."
+            tests:
+              - not_null
+          - name: quantity_ordered
+            description: "Métrica numérica que indica a quantidade total de unidades solicitadas do produto."
+            tests:
+              - not_null
+          - name: unit_cost
+            description: "Custo unitário do item registrado na moeda nativa original do pedido."
+            tests:
+              - not_null
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
+      
+      - name: purchase_orders
+        description: "Tabela de cabeçalho dos pedidos de compra, contendo informações gerais de prazos, moedas e chaves de negócio."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do pedido de compra."
+            tests:
+              - unique
+              - not_null
+          - name: po_number
+            description: "Número identificador operacional do pedido de compra."
+            tests:
+              - not_null
+          - name: supplier_id
+            description: "Chave estrangeira que vincula o pedido ao fornecedor (suppliers)."
+            tests:
+              - not_null
+          - name: buyer_id
+            description: "Chave estrangeira que vincula o pedido ao funcionário comprador (dim_employee)."
+            tests:
+              - not_null
+          - name: destination_location_id
+            description: "Chave estrangeira que indica a filial de destino do estoque (dim_location)."
+            tests:
+              - not_null
+          - name: status
+            description: "Status do ciclo de vida do pedido (ex: draft, sent, received, cancelled)."
+            tests:
+              - not_null
+          - name: currency
+            description: "Código da moeda utilizada nas condições comerciais do pedido (ex: BRL, USD)."
+            tests:
+              - not_null
+          - name: placed_at
+            description: "Carimbo de data/hora que indica quando o pedido foi oficialmente emitido."
+            tests:
+              - not_null
+          - name: expected_delivery_at
+            description: "Data prevista para a entrega das mercadorias nas docas (Aceita nulos no banco)."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
+
+      - name: return_items
+        description: "Tabela contendo os itens individuais devolvidos pelos clientes no processo de logística reversa."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do item devolvido."
+            tests:
+              - unique
+              - not_null
+          - name: return_id
+            description: "Chave estrangeira que vincula o item ao cabeçalho da devolução (returns)."
+            tests:
+              - not_null
+          - name: order_item_id
+            description: "Chave estrangeira que vincula o item devolvido ao item original do pedido de venda (order_items)."
+            tests:
+              - not_null
+          - name: action
+            description: "Ação aplicada ao item devolvido (ex: refund para reembolso, exchange para troca)."
+            tests:
+              - not_null
+          - name: exchange_variant_id
+            description: "Chave estrangeira que identifica a nova variante do produto enviado em caso de troca física (Aceita nulos no banco)."
+          - name: quantity
+            description: "Métrica que indica a quantidade de unidades que foram devolvidas pelo cliente."
+            tests:
+              - not_null
+          - name: unit_refund_amount
+            description: "Métrica financeira que indica o valor unitário de reembolso a ser estornado."
+            tests:
+              - not_null
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
+
+      - name: returns
+        description: "Tabela de cabeçalho das devoluções, registrando os motivos, clientes e filiais envolvidas na logística reversa."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única da devolução."
+            tests:
+              - unique
+              - not_null
+          - name: return_number
+            description: "Número operacional identificador da devolução."
+            tests:
+              - not_null
+          - name: customer_id
+            description: "Chave estrangeira que vincula a devolução ao cliente (dim_customer)."
+            tests:
+              - not_null
+          - name: order_id
+            description: "Chave estrangeira que vincula a devolução ao pedido original de venda (orders)."
+            tests:
+              - not_null
+          - name: received_at_location_id
+            description: "Chave estrangeira que identifica a filial física que recebeu o produto devolvido (dim_location)."
+            tests:
+              - not_null
+          - name: status
+            description: "Status atual do processo de devolução (ex: open, completed, cancelled)."
+            tests:
+              - not_null
+          - name: reason
+            description: "O motivo alegado pelo cliente para realizar a devolução do produto (Aceita nulos no banco)."
+          - name: created_at
+            description: "Carimbo de data/hora que indica quando a devolução foi aberta."
+            tests:
+              - not_null
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
+
+      - name: stock_levels
+        description: "Tabela contendo os níveis de estoque atuais por variante de produto e filial."
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments: 
+                combination_of_columns:
+                  - product_variant_id
+                  - location_id
+        columns:
+          - name: product_variant_id
+            description: "Chave estrangeira que vincula o registro à variante do produto (dim_product_variant)."
+            tests:
+              - not_null
+          - name: location_id
+            description: "Chave estrangeira que vincula o registro à localização ou filial física (dim_location)."
+            tests:
+              - not_null
+          - name: quantity_on_hand
+            description: "Métrica que indica a quantidade física de saldo disponível em estoque em tempo real."
+            tests:
+              - not_null
+          - name: reorder_point
+            description: "Ponto de ressuprimento. Nível mínimo de estoque que dispara o gatilho para novas compras (Aceita nulos no banco)."
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
+
+      - name: stock_movements
+        description: "Tabela contendo o histórico atômico e o diário de auditoria de todas as movimentações físicas de estoque."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do registro de movimentação de estoque."
+            tests:
+              - unique
+              - not_null
+          - name: product_variant_id
+            description: "Chave estrangeira que vincula o movimento à variante do produto (dim_product_variant)."
+            tests:
+              - not_null
+          - name: location_id
+            description: "Chave estrangeira que aponta para o armazém ou loja física onde o estoque oscilou."
+            tests:
+              - not_null
+          - name: employee_id
+            description: "Chave estrangeira que identifica o funcionário operador responsável pelo ajuste (Aceita nulos no banco)."
+          - name: movement_type
+            description: "Tipo de movimentação realizada (ex: return_in, return_out, manual_adjustment)."
+            tests:
+              - not_null
+          - name: reference_table
+            description: "Identifica a tabela ou documento do ERP que disparou o gatilho físico (Aceita nulos no banco)."
+          - name: reference_id
+            description: "ID do documento de origem contido na tabela de referência (Aceita nulos no banco)."
+          - name: notes
+            description: "Justificativas textuais e observações inseridas pelo operador de pátio (Aceita nulos no banco)."
+          - name: quantity
+            description: "Métrica de quantidade de itens movimentados (pode aceitar valores fracionados ou decimais)."
+            tests:
+              - not_null
+          - name: occurred_at
+            description: "Carimbo de data/hora que indica o momento exato em que a movimentação física aconteceu."
+            tests:
+              - not_null
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
+
+      - name: suppliers
+        description: "Tabela mestre contendo o cadastro transacional e os dados fiscais de todos os fornecedores nacionais e internacionais."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do fornecedor no sistema de origem."
+            tests:
+              - unique
+              - not_null
+          - name: legal_name
+            description: "Razão Social oficial do fornecedor cadastrado."
+            tests:
+              - not_null
+          - name: trade_name
+            description: "Nome Fantasia comercial do parceiro fornecedor (Aceita nulos no banco)."
+          - name: tax_id
+            description: "Código de identificação fiscal do fornecedor (Aceita nulos no banco)."
+          - name: tax_id_type
+            description: "Tipo de documento fiscal utilizado para a validação (Aceita nulos no banco)."
+          - name: contact_name
+            description: "Nome do ponto de contato/vendedor ou responsável no fornecedor (Aceita nulos no banco)."
+          - name: email
+            description: "E-mail oficial de contato para compras e abastecimento (Aceita nulos no banco)."
+          - name: phone
+            description: "Telefone de contato do fornecedor (Aceita nulos no banco)."
+          - name: country
+            description: "País de origem ou sede onde o fornecedor está operando."
+            tests:
+              - not_null
+          - name: is_active
+            description: "Flag booleana indicando se o cadastro do fornecedor está ativo na plataforma."
+            tests:
+              - not_null
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
+
+      - name: variant_attribute_values
+        description: "Tabela contendo os valores dos atributos dinâmicos das variantes de produtos (Modelo EAV), como cor, tamanho e voltagem."
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments: 
+                combination_of_columns:
+                  - product_variant_id
+                  - attribute_id
+        columns:
+          - name: product_variant_id
+            description: "Chave estrangeira que liga o atributo à variante do produto correspondente (product_variants)."
+            tests:
+              - not_null
+          - name: attribute_id
+            description: "Chave estrangeira que identifica o tipo de atributo (ex: 1 para cor, 2 para tamanho, 3 para comprimento)."
+            tests:
+              - not_null
+          - name: value
+            description: "O valor textual ou numérico bruto da especificação do produto que será pivotado na Gold."
+            tests:
+              - not_null
+          - name: ingestion_timestamp
+            description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+            tests:
+              - not_null
+      
+      - name: employees
+        description: "Tabela transacional contendo o cadastro bruto de funcionários, vendedores e estoquistas da empresa."
+        columns:
+          - name: id
+            description: "Chave primária (Business Key) identificadora do funcionário no sistema de origem."
+            tests:
+              - unique
+              - not_null
+          - name: full_name
+            description: "Nome completo do funcionário."
+            tests:
+              - not_null
+          - name: cpf
+            description: "Cadastro de Pessoa Física (CPF) do colaborador. Dado sensível sujeito a regras de LGPD."
+            tests:
+              - unique
+              - not_null
+          - name: email
+            description: "Endereço de e-mail corporativo do funcionário."
+          - name: role
+            description: "Cargo ocupado pelo colaborador (Ex: manager, stockist, salesperson)."
+            tests:
+              - not_null
+          - name: primary_location_id
+            description: "Chave estrangeira que identifica a localização/filial principal onde o funcionário atua."
+            tests:
+              - not_null
+          - name: hire_date
+            description: "Data em que o funcionário foi oficialmente contratado pela empresa."
+            tests:
+              - not_null
+          - name: termination_date
+            description: "Data de desligamento do funcionário. Campo nulo indica que o colaborador continua ativo."
+
+      - name: locations
+        description: "Tabela contendo os dados de localização física e galpões/estoques."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única da localização."
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: "Nome descritivo do local ou filial."
+            tests:
+              - not_null
+          - name: location_type
+            description: "Tipo de estabelecimento (ex: Galpão, Loja, Depósito)."
+            tests:
+              - not_null
+          - name: postal_code
+            description: "Código postal / CEP do local."
+            tests:
+              - not_null
+          - name: street
+            description: "Nome da rua/avenida do endereço."
+            tests:
+              - not_null
+          - name: number
+            description: "Número do imóvel ou lote da localização."
+          - name: complement
+            description: "Complemento do endereço (bloco, sala, etc.)."
+          - name: district
+            description: "Bairro do estabelecimento."
+            tests:
+              - not_null
+          - name: city
+            description: "Cidade onde a filial está localizada."
+            tests:
+              - not_null
+          - name: state
+            description: "Unidade Federativa / Estado (sigla)."
+            tests:
+              - not_null
+          - name: country
+            description: "País onde o estabelecimento está localizado."
+            tests:
+              - not_null
+          - name: is_active
+            description: "Indicador booleano se a localização está ativa e operacional."
+            tests:
+              - not_null
+          - name: created_at
+            description: "Data de criação do registro de localização."
+            tests:
+              - not_null
+          - name: updated_at
+            description: "Data da última atualização do registro de localização."
+            tests:
+              - not_null
+
+      - name: products
+        description: "Tabela mestre contendo as informações gerais e cadastrais dos produtos."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do produto."
+            tests:
+              - unique
+              - not_null
+          - name: name
+            description: "Nome comercial/mestre do produto pai."
+            tests:
+              - not_null
+          - name: description
+            description: "Descrição detalhada técnica ou comercial do produto."
+          - name: brand_id
+            description: "Chave estrangeira que identifica a marca do produto."
+            tests:
+              - not_null
+          - name: category_id
+            description: "Chave estrangeira que identifica a categoria do produto."
+            tests:
+              - not_null
+          - name: ncm_code
+            description: "Código numérico de controle ou NCM do produto."
+            tests:
+              - not_null
+          - name: unit_of_measure
+            description: "Unidade de medida padrão do produto (ex: UN, KG, CX)."
+            tests:
+              - not_null
+          - name: is_active
+            description: "Se o produto mestre está ativo na base."
+            tests:
+              - not_null
+          - name: created_at
+            description: "Data de criação do produto mestre."
+            tests:
+              - not_null
+          - name: updated_at
+            description: "Data da última atualização do produto."
+            tests:
+              - not_null
+
+      - name: product_variants
+        description: "Tabela contendo os detalhes específicos e SKUs das variantes dos produtos."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única da variante do produto."
+            tests:
+              - unique
+              - not_null
+          - name: product_id
+            description: "Chave estrangeira que vincula a variante ao produto pai."
+            tests:
+              - not_null
+          - name: sku
+            description: "Stock Keeping Unit - Código único de inventário da variante."
+            tests:
+              - unique
+              - not_null
+          - name: barcode_ean
+            description: "Código de barras global (EAN) da variante."
+          - name: sale_price
+            description: "Preço padrão de venda praticado para essa variante."
+            tests:
+              - not_null
+          - name: cost_price
+            description: "Preço base de custo de aquisição/produção da variante."
+            tests:
+              - not_null
+          - name: weight_kg
+            description: "Peso físico da variante expresso em quilogramas."
+          - name: icms_rate
+            description: "Alíquota padrão de ICMS associada a esta variante."
+            tests:
+              - not_null
+          - name: ipi_rate
+            description: "Alíquota padrão de IPI associada a esta variante."
+            tests:
+              - not_null
+          - name: is_active
+            description: "Se a variante está disponível para movimentação e venda no momento."
+            tests:
+              - not_null
+          - name: created_at
+            description: "Data de cadastro da variante."
+            tests:
+              - not_null
+          - name: updated_at
+            description: "Data de última alteração dos dados da variante."
+            tests:
+              - not_null
+
+      - name: product_suppliers
+        description: "Tabela de junção que mapeia o relacionamento entre variantes de produtos e seus fornecedores."
+        columns:
+          - name: product_variant_id
+            description: "Parte da chave composta identificando a variante do produto."
+            tests:
+              - not_null
+          - name: supplier_id
+            description: "Parte da chave composta identificando o fornecedor."
+            tests:
+              - not_null
+          - name: supplier_sku
+            description: "Código interno que o fornecedor utiliza para aquele produto."
+          - name: last_quoted_cost
+            description: "Último custo cotado ou cobrado por esse fornecedor."
+          - name: lead_time_days
+            description: "Tempo médio em dias para entrega do produto por este fornecedor."
+          - name: is_preferred
+            description: "Indicador se este é o fornecedor principal para essa variante."
+            tests:
+              - not_null
+          - name: created_at
+            description: "Data de criação do vínculo."
+            tests:
+              - not_null
+          - name: updated_at
+            description: "Data de alteração do vínculo."
+            tests:
+              - not_null
+
+      - name: orders
+        description: "Tabela de cabeçalho dos pedidos de venda contendo totais, status e canais."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do pedido."
+            tests:
+              - unique
+              - not_null
+          - name: order_number
+            description: "Código alfa-numérico de identificação do pedido."
+            tests:
+              - unique
+              - not_null
+          - name: channel
+            description: "Canal por onde a venda ocorreu (ex: Loja Física, E-commerce)."
+            tests:
+              - not_null
+          - name: customer_id
+            description: "Chave estrangeira que identifica o cliente comprador."
+            tests:
+              - not_null
+          - name: salesperson_id
+            description: "Chave estrangeira do funcionário/vendedor do pedido."
+          - name: location_id
+            description: "Chave estrangeira apontando o local físico onde o pedido foi faturado."
+            tests:
+              - not_null
+          - name: status
+            description: "Status do processamento do pedido (ex: Shipped, Cancelled)."
+            tests:
+              - not_null
+          - name: subtotal
+            description: "Valor total dos itens antes dos descontos aplicados."
+            tests:
+              - not_null
+          - name: discount_amount
+            description: "Valor do desconto concedido ao pedido."
+            tests:
+              - not_null
+          - name: total
+            description: "Valor líquido final faturado do pedido."
+            tests:
+              - not_null
+          - name: placed_at
+            description: "Data e hora em que a compra foi realizada."
+            tests:
+              - not_null
+          - name: created_at
+            description: "Data de gravação no sistema operacional de origem."
+            tests:
+              - not_null
+          - name: updated_at
+            description: "Data da última atualização do pedido na origem."
+            tests:
+              - not_null
+
+      - name: order_items
+        description: "Itens de detalhe que compõem cada um dos pedidos de venda."
+        columns:
+          - name: id
+            description: "Chave primária do item do pedido."
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            description: "Chave de associação com o cabeçalho do pedido (orders)."
+            tests:
+              - not_null
+          - name: product_variant_id
+            description: "ID do produto específico associado a esta linha."
+            tests:
+              - not_null
+          - name: quantity
+            description: "Quantidade física comprada da variante do produto."
+            tests:
+              - not_null
+          - name: unit_price
+            description: "Preço unitário aplicado no momento da transação."
+            tests:
+              - not_null
+          - name: icms_rate
+            description: "Alíquota do imposto ICMS aplicada ao item."
+            tests:
+              - not_null
+          - name: ipi_rate
+            description: "Alíquota do imposto IPI aplicada ao item."
+            tests:
+              - not_null
+          - name: line_total
+            description: "Total bruto consolidado da linha do item."
+            tests:
+              - not_null
+
+      - name: payments
+        description: "Transações financeiras de pagamento vinculadas aos pedidos faturados."
+        columns:
+          - name: id
+            description: "Chave primária do pagamento cadastrado."
+            tests:
+              - unique
+              - not_null
+          - name: order_id
+            description: "Associação direta ao pedido que recebeu esse pagamento."
+            tests:
+              - not_null
+          - name: method
+            description: "Meio de pagamento empregado (Credit Card, Boleto, PIX, etc.)."
+            tests:
+              - not_null
+          - name: installments
+            description: "Número de parcelas acordadas para liquidação."
+            tests:
+              - not_null
+          - name: amount
+            description: "Montante transacionado nesta forma de pagamento."
+            tests:
+              - not_null
+          - name: status
+            description: "Status da transação de pagamento (ex: Approved, Pending, Refunded)."
+            tests:
+              - not_null
+          - name: paid_at
+            description: "Data/hora de liquidação financeira confirmada."
+          - name: created_at
+            description: "Instante de registro da intenção de pagamento no sistema."
+            tests:
+              - not_null
+          - name: updated_at
+            description: "Data da última atualização do registro de pagamento."
+            tests:
+              - not_null
+
+      - name: goods_receipts
+        description: "Tabela contendo os registros de recebimento físico de mercadorias no estoque."
+        columns:
+          - name: id
+            description: "Chave primária identificadora única do recebimento de mercadorias."
+            tests:
+              - unique
+              - not_null
+          - name: purchase_order_id
+            description: "Chave estrangeira vinculando o recebimento ao pedido de compra de origem."
+            tests:
+              - not_null
+          - name: received_by_employee_id
+            description: "Chave estrangeira identificando o funcionário que recebeu a mercadoria."
+            tests:
+              - not_null
+          - name: received_at
+            description: "Data e hora em que a mercadoria foi fisicamente entregue e recebida."
+            tests:
+              - not_null
+          - name: notes
+            description: "Observações ou notas adicionais inseridas durante o recebimento."
+          - name: created_at
+            description: "Data de gravação do registro de recebimento no sistema."
+            tests:
+              - not_null
+
+

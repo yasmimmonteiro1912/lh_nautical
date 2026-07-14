@@ -9,8 +9,8 @@ with source_data as (
 
     select
         cast(id as int) as product_id
-        , cast(name as string) as name
-        , cast(description as string) as description
+        , cast(name as string) as product_name
+        , cast(description as string) as product_description
         , cast(brand_id as int) as brand_id
         , cast(category_id as int) as category_id
         , cast(ncm_code as string) as ncm_code

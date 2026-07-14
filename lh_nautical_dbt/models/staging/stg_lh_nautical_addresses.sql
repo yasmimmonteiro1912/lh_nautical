@@ -10,15 +10,15 @@ renamed as (
     select
         cast(id as int) as address_id
         , cast(customer_id as int) as customer_id
-        , cast(address_type as varchar) as address_type
-        , cast(postal_code as varchar) as postal_code
-        , cast(street as varchar) as street
-        , cast(number as varchar) as street_number
-        , cast(complement as varchar) as complement
-        , cast(district as varchar) as district
-        , cast(city as varchar) as city
-        , cast(state as varchar) as state
-        , cast(country as varchar) as country
+        , cast(address_type as string) as address_type
+        , cast(postal_code as string) as postal_code
+        , cast(street as string) as street
+        , cast(number as string) as street_number
+        , cast(complement as string) as complement
+        , cast(district as string) as district
+        , cast(city as string) as city
+        , cast(state as string) as customer_state
+        , cast(country as string) as country
         , cast(is_primary as boolean) as is_primary
     from source_addresses
 
@@ -26,4 +26,3 @@ renamed as (
 
 select * 
 from renamed
-

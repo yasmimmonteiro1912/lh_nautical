@@ -6,7 +6,7 @@ dialect = databricks
 templater = dbt
 
 # Ignorar a pasta de logs e a pasta dbt_packages (se houver)
-exclude_rules = None
+exclude_rules = LT01
 ignore = templating
 
 [sqlfluff:templater:dbt]
