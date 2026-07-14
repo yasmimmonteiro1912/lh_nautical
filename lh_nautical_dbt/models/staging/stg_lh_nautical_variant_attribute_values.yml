@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_variant_attribute_values
+    description: "Modelo de staging contendo os valores dos atributos dinâmicos das variantes de produtos (Modelo EAV), como cor, tamanho e voltagem."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - product_variant_id
+            - attribute_id
+    columns:
+      - name: product_variant_id
+        description: "Chave estrangeira que liga o atributo à variante do produto correspondente (product_variants)."
+        tests:
+          - not_null
+
+      - name: attribute_id
+        description: "Chave estrangeira que identifica o tipo de atributo (ex: 1 para cor, 2 para tamanho)."
+        tests:
+          - not_null
+
+      - name: attribute_value
+        description: "O valor textual ou numérico bruto da especificação do produto que será pivotado na Gold."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_returns
+    description: "Modelo de staging para o cabeçalho das devoluções, registrando os motivos, clientes e filiais envolvidas na logística reversa."
+    columns:
+      - name: return_id
+        description: "Chave primária identificadora única da devolução."
+        tests:
+          - unique
+          - not_null
+
+      - name: return_number
+        description: "Número operacional identificador da devolução."
+        tests:
+          - not_null
+
+      - name: customer_id
+        description: "Chave estrangeira que vincula a devolução ao cliente (dim_customer)."
+        tests:
+          - not_null
+
+      - name: order_id
+        description: "Chave estrangeira que vincula a devolução ao pedido original de venda (orders)."
+        tests:
+          - not_null
+
+      - name: received_at_location_id
+        description: "Chave estrangeira que identifica a filial física que recebeu o produto devolvido (dim_location)."
+        tests:
+          - not_null
+
+      - name: return_status
+        description: "Status atual do processo de devolução (ex: open, completed, cancelled)."
+        tests:
+          - not_null
+
+      - name: return_reason
+        description: "O motivo alegado pelo cliente para realizar a devolução do produto (Aceita nulos no banco)."
+
+      - name: returned_at
+        description: "Carimbo de data/hora que indica quando a devolução foi aberta."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

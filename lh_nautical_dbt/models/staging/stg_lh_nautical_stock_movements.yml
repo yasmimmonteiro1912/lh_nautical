@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_stock_movements
+    description: "Modelo de staging contendo o histórico atômico e o diário de auditoria de todas as movimentações físicas de estoque."
+    columns:
+      - name: stock_movement_id
+        description: "Chave primária identificadora única do registro de movimentação de estoque."
+        tests:
+          - unique
+          - not_null
+
+      - name: product_variant_id
+        description: "Chave estrangeira que vincula o movimento à variante do produto (dim_product_variant)."
+        tests:
+          - not_null
+
+      - name: location_id
+        description: "Chave estrangeira que aponta para o armazém ou loja física onde o estoque oscilou."
+        tests:
+          - not_null
+
+      - name: employee_id
+        description: "Chave estrangeira que identifica o funcionário operador responsável pelo ajuste (Aceita nulos no banco)."
+
+      - name: movement_type
+        description: "Tipo de movimentação realizada (ex: return_in, return_out, manual_adjustment)."
+        tests:
+          - not_null
+
+      - name: reference_table
+        description: "Identifica a tabela ou documento do ERP que disparou o gatilho físico (Aceita nulos no banco)."
+
+      - name: reference_id
+        description: "ID do documento de origem contido na tabela de referência (Aceita nulos no banco)."
+
+      - name: movement_notes
+        description: "Justificativas textuais e observações inseridas pelo operador de pátio (Aceita nulos no banco)."
+
+      - name: quantity
+        description: "Métrica de quantidade de itens movimentados."
+        tests:
+          - not_null
+
+      - name: occurred_at
+        description: "Carimbo de data/hora que indica o momento exato em que a movimentação física aconteceu."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null
