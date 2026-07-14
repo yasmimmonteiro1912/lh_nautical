@@ -32,6 +32,8 @@ models:
 
       - name: number
         description: "Número do imóvel ou lote da localização."
+        tests:
+          - not_null
 
       - name: complement
         description: "Complemento do endereço (bloco, sala, etc.)."
@@ -70,4 +72,3 @@ models:
         description: "Data da última atualização do registro de localização."
         tests:
           - not_null
-          
