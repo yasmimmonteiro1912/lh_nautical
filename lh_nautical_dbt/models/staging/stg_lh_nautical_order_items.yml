@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_order_items
+    description: "Itens de detalhe que compõem cada um dos pedidos de venda."
+    columns:
+      - name: id
+        description: "Chave primária do item do pedido."
+        tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        description: "Chave de associação com o cabeçalho do pedido (orders)."
+        tests:
+          - not_null
+
+      - name: product_variant_id
+        description: "ID do produto específico associado a esta linha."
+        tests:
+          - not_null
+
+      - name: quantity
+        description: "Quantidade física comprada da variante do produto."
+        tests:
+          - not_null
+
+      - name: unit_price
+        description: "Preço unitário aplicado no momento da transação."
+        tests:
+          - not_null
+
+      - name: icms_rate
+        description: "Alíquota do imposto ICMS aplicada ao item."
+        tests:
+          - not_null
+
+      - name: ipi_rate
+        description: "Alíquota do imposto IPI aplicada ao item."
+        tests:
+          - not_null
+
+      - name: line_total
+        description: "Total bruto consolidado da linha do item."
+        tests:
+          - not_null
+          

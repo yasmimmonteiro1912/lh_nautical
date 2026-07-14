@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_payments
+    description: "Transações financeiras de pagamento vinculadas aos pedidos faturados."
+    columns:
+      - name: id
+        description: "Chave primária do pagamento cadastrado."
+        tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        description: "Associação direta ao pedido que recebeu esse pagamento."
+        tests:
+          - not_null
+
+      - name: method
+        description: "Meio de pagamento empregado (Credit Card, Boleto, PIX, etc.)."
+        tests:
+          - not_null
+
+      - name: installments
+        description: "Número de parcelas acordadas para liquidação."
+        tests:
+          - not_null
+
+      - name: amount
+        description: "Montante transacionado nesta forma de pagamento."
+        tests:
+          - not_null
+
+      - name: status
+        description: "Status da transação de pagamento (ex: Approved, Pending, Refunded)."
+        tests:
+          - not_null
+
+      - name: paid_at
+        description: "Data/hora de liquidação financeira confirmada."
+
+      - name: created_at
+        description: "Instante de registro da intenção de pagamento no sistema."
+        tests:
+          - not_null
+          
+      - name: updated_at
+        description: "Data da última atualização do registro de pagamento."
+        tests:
+          - not_null

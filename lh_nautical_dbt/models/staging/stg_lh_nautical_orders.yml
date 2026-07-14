@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_orders
+    description: "Tabela de cabeçalho dos pedidos de venda contendo totais, status e canais."
+    columns:
+      - name: id
+        description: "Chave primária identificadora única do pedido."
+        tests:
+          - unique
+          - not_null
+
+      - name: order_number
+        description: "Código alfa-numérico de identificação do pedido."
+        tests:
+          - unique
+          - not_null
+
+      - name: channel
+        description: "Canal por onde a venda ocorreu (ex: Loja Física, E-commerce)."
+        tests:
+          - not_null
+
+      - name: customer_id
+        description: "Chave estrangeira que identifica o cliente comprador."
+        tests:
+          - not_null
+
+      - name: salesperson_id
+        description: "Chave estrangeira do funcionário/vendedor do pedido."
+
+      - name: location_id
+        description: "Chave estrangeira apontando o local físico onde o pedido foi faturado."
+        tests:
+          - not_null
+
+      - name: status
+        description: "Status do processamento do pedido (ex: Shipped, Cancelled)."
+        tests:
+          - not_null
+
+      - name: subtotal
+        description: "Valor total dos itens antes dos descontos aplicados."
+        tests:
+          - not_null
+
+      - name: discount_amount
+        description: "Valor do desconto concedido ao pedido."
+        tests:
+          - not_null
+
+      - name: total
+        description: "Valor líquido final faturado do pedido."
+        tests:
+          - not_null
+
+      - name: placed_at
+        description: "Data e hora em que a compra foi realizada."
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Data de gravação no sistema operacional de origem."
+        tests:
+          - not_null
+
+      - name: updated_at
+        description: "Data da última atualização do pedido na origem."
+        tests:
+          - not_null
+          

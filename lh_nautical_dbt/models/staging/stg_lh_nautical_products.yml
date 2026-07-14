@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_products
+    description: "Tabela mestre contendo as informações gerais e cadastrais dos produtos."
+    columns:
+      - name: id
+        description: "Chave primária identificadora única do produto."
+        tests:
+          - unique
+          - not_null
+
+      - name: name
+        description: "Nome comercial/mestre do produto pai."
+        tests:
+          - not_null
+
+      - name: description
+        description: "Descrição detalhada técnica ou comercial do produto."
+
+      - name: brand_id
+        description: "Chave estrangeira que identifica a marca do produto."
+        tests:
+          - not_null
+
+      - name: category_id
+        description: "Chave estrangeira que identifica a categoria do produto."
+        tests:
+          - not_null
+
+      - name: ncm_code
+        description: "Código numérico de controle ou NCM do produto."
+        tests:
+          - not_null
+
+      - name: unit_of_measure
+        description: "Unidade de medida padrão do produto (ex: UN, KG, CX)."
+        tests:
+          - not_null
+
+      - name: is_active
+        description: "Se o produto mestre está ativo na base."
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Data de criação do produto mestre."
+        tests:
+          - not_null
+
+      - name: updated_at
+        description: "Data da última atualização do produto."
+        tests:
+          - not_null
+          

@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_goods_receipts
+    description: "Tabela contendo os registros de recebimento físico de mercadorias no estoque."
+    columns:
+      - name: id
+        description: "Chave primária identificadora única do recebimento de mercadorias."
+        tests:
+          - unique
+          - not_null
+
+      - name: purchase_order_id
+        description: "Chave estrangeira vinculando o recebimento ao pedido de compra de origem."
+        tests:
+          - not_null
+
+      - name: received_by_employee_id
+        description: "Chave estrangeira identificando o funcionário que recebeu a mercadoria."
+        tests:
+          - not_null
+
+      - name: received_at
+        description: "Data e hora em que a mercadoria foi fisicamente entregue e recebida."
+        tests:
+          - not_null
+
+      - name: notes
+        description: "Observações ou notas adicionais inseridas durante o recebimento."
+      
+      - name: created_at
+        description: "Data de gravação do registro de recebimento no sistema."
+        tests:
+          - not_null
