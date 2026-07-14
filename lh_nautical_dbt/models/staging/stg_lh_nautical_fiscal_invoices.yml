@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_fiscal_invoices
+    description: "Camada de staging para a tabela transacional de notas fiscais (fiscal_invoices). Limpa, tipa e prepara os dados de faturamento legal da LH Nautical."
+    columns:
+      - name: fiscal_invoice_id
+        description: "Chave primária que identifica unicamente a nota fiscal eletrônica na camada de staging."
+        tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        description: "Chave estrangeira que conecta a nota fiscal eletrônica ao pedido correspondente no OLTP."
+        tests:
+          - not_null
+
+      - name: nfe_number
+        description: "Número identificador sequencial da Nota Fiscal Eletrônica (NF-e)."
+        tests:
+          - not_null
+
+      - name: nfe_access_key
+        description: "Chave de acesso de 44 dígitos gerada pela Sefaz para consulta e validação da NF-e."
+
+      - name: nfe_series
+        description: "Série emissora associada ao documento fiscal (Ex: 1, 2)."
+
+      - name: issued_at
+        description: "Data e hora exata da emissão e homologação da nota fiscal."
+        tests:
+          - not_null
+
+      - name: invoice_status
+        description: "Status do documento fiscal perante o fisco (Ex: Emitida, Cancelada, Inutilizada)."
+        tests:
+          - not_null
+
+      - name: total_amount
+        description: "Valor bruto total do faturamento homologado na nota fiscal, vital para reconciliações com a fct_sales_items."
+        tests:
+          - not_null
