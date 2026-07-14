@@ -8,17 +8,17 @@ with source_data as (
 , renamed as (
 
     select
-        id as supplier_id
-        , legal_name
-        , trade_name
-        , tax_id
-        , tax_id_type
-        , contact_name
-        , email
-        , phone
-        , country
-        , is_active as supplier_is_active
-        , ingestion_timestamp
+        cast(id as int) as supplier_id
+        , cast(legal_name as string) as legal_name
+        , cast(trade_name as string) as trade_name
+        , cast(tax_id as string) as tax_id
+        , cast(tax_id_type as string) as tax_id_type
+        , cast(contact_name as string) as contact_name
+        , cast(email as string) as email
+        , cast(phone as string) as phone
+        , cast(country as string) as country
+        , cast(is_active as boolean) as supplier_is_active
+        , cast(ingestion_timestamp as timestamp) as ingestion_timestamp
     from source_data
 
 )
