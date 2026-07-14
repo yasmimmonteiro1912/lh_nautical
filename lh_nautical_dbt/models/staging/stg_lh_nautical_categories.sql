@@ -11,8 +11,10 @@ renamed as (
         cast(id as int) as category_id
         , cast(name as string) as category_name
         , cast(slug as string) as category_slug
-        , cast(parent_category_id as int) as parent_category_id -- Preserva o relacionamento para a hierarquia de subcategorias
-        , cast(is_active as boolean) as is_active -- Converte o tipo bit (0/1) da origem para lógico
+        -- Preserva o relacionamento para a hierarquia de categorias
+        , cast(parent_category_id as int) as parent_category_id  
+        -- Converte o tipo bit (0/1) da origem para lógico
+        , cast(is_active as boolean) as is_active 
     from source_categories
 
 )

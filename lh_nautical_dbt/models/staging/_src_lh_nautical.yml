@@ -26,7 +26,7 @@ sources:
       - name: fiscal_invoices
         description: "Notas fiscais (NF-e) geradas na venda para conformidade fiscal."
 
-      - name: good_receips_items
+      - name: goods_receipt_items
         description: "Itens individuais descarregados no CD (Nota: contém erro ortográfico da origem)."
 
       - name: goods_receipts

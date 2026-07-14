@@ -11,7 +11,7 @@ with source_data as (
         cast(id as int) as return_item_id
         , cast(return_id as int) as return_id
         , cast(order_item_id as int) as order_item_id
-        , cast(action as string) as action
+        , cast(action as string) as return_action
         , cast(exchange_variant_id as int) as exchange_variant_id
         , cast(quantity as decimal(14,3)) as quantity
         , cast(unit_refund_amount as decimal(14,2)) as unit_refund_amount

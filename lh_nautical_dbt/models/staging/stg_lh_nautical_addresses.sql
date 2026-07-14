@@ -17,7 +17,7 @@ renamed as (
         , cast(complement as string) as complement
         , cast(district as string) as district
         , cast(city as string) as city
-        , cast(state as string) as state
+        , cast(state as string) as customer_state
         , cast(country as string) as country
         , cast(is_primary as boolean) as is_primary
     from source_addresses
