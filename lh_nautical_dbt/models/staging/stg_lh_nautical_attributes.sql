@@ -9,8 +9,8 @@ renamed as (
 
     select
         cast(id as int) as attribute_id
-        , cast(name as varchar) as attribute_name
-        , cast(data_type as varchar) as data_type
+        , cast(name as string) as attribute_name
+        , cast(data_type as string) as data_type
     from source_attributes
 
 )
