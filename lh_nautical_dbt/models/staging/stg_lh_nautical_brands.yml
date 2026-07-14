@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_brands
+    description: "Modelo de staging que limpa, tipa e padroniza os dados das marcas de produtos da LH Nautical."
+    columns:
+      - name: brand_id
+        description: "Chave primária padronizada para identificar unicamente a marca."
+        tests:
+          - unique
+          - not_null
+
+      - name: brand_name
+        description: "Nome comercial da marca (Ex: Yamaha Marine, Garmin, Volvo Penta)."
+        tests:
+          - not_null
+
+      - name: brand_country
+        description: "Sigla correspondente ao país de origem da marca. Pode conter valores nulos para marcas internacionais não mapeadas."
+
+      - name: is_active
+        description: "Indicador lógico booleano que determina se o cadastro da marca está ativo para novos produtos."
+        tests:
+          - not_null

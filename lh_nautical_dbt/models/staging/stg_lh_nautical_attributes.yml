@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_attributes
+    description: "Modelo contendo os metadados dos atributos dinâmicos das variantes de produtos (Modelo EAV)."
+    columns:
+      - name: attribute_id
+        description: "Chave primária (Business Key) identificadora do atributo no sistema de origem."
+        tests:
+          - unique
+          - not_null
+      - name: attribute_name
+        description: "Nome do atributo dinâmico (Ex: color, size, power_hp, voltage_v, weight_kg, waterproof, material)."
+        tests:
+          - not_null
+      - name: data_type
+        description: "Tipo de dado do valor do atributo (Ex: text, number, boolean) utilizado para guiar o parse de dados na camada Gold."
+        tests:
+          - not_null

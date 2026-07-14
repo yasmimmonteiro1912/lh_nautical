@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_categories
+    description: "Modelo de staging que limpa, tipa e padroniza a taxonomia de categorias de produtos da LH Nautical."
+    columns:
+      - name: category_id
+        description: "Chave primária padronizada que identifica unicamente a categoria."
+        tests:
+          - unique
+          - not_null
+
+      - name: category_name
+        description: "Nome de exibição comercial da categoria (Ex: Equipamentos, Cabos, Motores)."
+        tests:
+          - not_null
+
+      - name: category_slug
+        description: "Texto amigável (slug) associado à categoria para rotas de e-commerce."
+
+      - name: parent_category_id
+        description: "Chave estrangeira de auto-relacionamento. Aponta para a categoria pai, permitindo estruturar hierarquias."
+
+      - name: is_active
+        description: "Indicador booleano que determina se a categoria está ativa no catálogo."
+        tests:
+          - not_null

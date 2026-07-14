@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_addresses
+    description: "Modelo de staging que limpa, tipa e padroniza os endereços dos clientes da LH Nautical."
+    columns:
+      - name: address_id
+        description: "Chave primária que identifica unicamente o endereço na camada de staging."
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Chave estrangeira que associa o endereço ao seu respectivo cliente."
+        tests:
+          - not_null
+
+      - name: address_type
+        description: "Tipo de endereço informado (Ex: Billing, Shipping, Residence)."
+
+      - name: postal_code
+        description: "Código de Endereçamento Postal (CEP)."
+
+      - name: street
+        description: "Nome do logradouro (rua, avenida, etc.)."
+
+      - name: street_number
+        description: "Número residencial ou comercial do endereço."
+
+      - name: complement
+        description: "Informações adicionais de entrega (Ex: Apto 101, Bloco B)."
+
+      - name: district
+        description: "Bairro associado ao endereço."
+
+      - name: city
+        description: "Cidade associada ao endereço."
+
+      - name: state
+        description: "Estado associado ao endereço."
+
+      - name: country
+        description: "País de registro do endereço."
+
+      - name: is_primary
+        description: "Indicador lógico que determina se este é o endereço principal de faturamento/entrega do cliente."

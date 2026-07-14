@@ -1,0 +1,49 @@
+version: 2
+models:
+  - name: stg_lh_nautical_customers
+    description: "Modelo de staging que limpa, tipa e padroniza os dados dos clientes da LH Nautical."
+    columns:
+      - name: customer_id
+        description: "Chave primária padronizada para identificar unicamente o cliente."
+        tests:
+          - unique
+          - not_null
+
+      - name: person_type
+        description: "Identificador do tipo de pessoa (Ex: PF para Pessoa Física, PJ para Pessoa Jurídica)."
+        tests:
+          - not_null
+
+      - name: legal_name
+        description: "Razão social ou nome completo do cliente."
+        tests:
+          - not_null
+
+      - name: trade_name
+        description: "Nome fantasia do cliente (relevante para PJ)."
+
+      - name: tax_id
+        description: "Documento de identificação fiscal (CPF para pessoa física ou CNPJ para pessoa jurídica)."
+        tests:
+          - unique
+          - not_null
+
+      - name: state_registration
+        description: "Inscrição Estadual do cliente (quando aplicável para PJ)."
+
+      - name: customer_email
+        description: "Endereço de e-mail principal cadastrado."
+
+      - name: customer_phone
+        description: "Número de telefone ou celular para contato comercial."
+
+      - name: is_active
+        description: "Indicador booleano (true/false) que determina se o cadastro do cliente está ativo."
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Carimbo de data e hora que indica a criação do registro de cliente."
+
+      - name: updated_at
+        description: "Carimbo de data e hora que indica a última atualização do registro de cliente."
