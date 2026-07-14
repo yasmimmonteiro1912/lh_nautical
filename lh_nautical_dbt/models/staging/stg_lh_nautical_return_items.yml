@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_return_items
+    description: "Modelo de staging contendo os itens individuais devolvidos pelos clientes no processo de logística reversa."
+    columns:
+      - name: return_item_id
+        description: "Chave primária identificadora única do item devolvido."
+        tests:
+          - unique
+          - not_null
+
+      - name: return_id
+        description: "Chave estrangeira que vincula o item ao cabeçalho da devolução (returns)."
+        tests:
+          - not_null
+
+      - name: order_item_id
+        description: "Chave estrangeira que vincula o item devolvido ao item original do pedido de venda (order_items)."
+        tests:
+          - not_null
+
+      - name: return_action
+        description: "Ação aplicada ao item devolvido (ex: refund para reembolso, exchange para troca)."
+        tests:
+          - not_null
+
+      - name: exchange_variant_id
+        description: "Chave estrangeira que identifica a nova variante do produto enviado em caso de troca física (Aceita nulos no banco)."
+
+      - name: quantity
+        description: "Métrica que indica a quantidade de unidades que foram devolvidas pelo cliente."
+        tests:
+          - not_null
+
+      - name: unit_refund_amount
+        description: "Métrica financeira que indica o valor unitário de reembolso a ser estornado."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

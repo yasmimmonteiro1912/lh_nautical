@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_suppliers
+    description: "Tabela mestre contendo o cadastro transacional e os dados fiscais de todos os fornecedores."
+    columns:
+      - name: supplier_id
+        description: "Chave primária identificadora única do fornecedor no sistema de origem."
+        tests:
+          - unique
+          - not_null
+
+      - name: legal_name
+        description: "Razão Social oficial do fornecedor cadastrado."
+        tests:
+          - not_null
+
+      - name: trade_name
+        description: "Nome Fantasia comercial do parceiro fornecedor (Aceita nulos no banco)."
+
+      - name: tax_id
+        description: "Código de identificação fiscal do fornecedor (Aceita nulos no banco)."
+
+      - name: tax_id_type
+        description: "Tipo de documento fiscal utilizado para a validação (Aceita nulos no banco)."
+
+      - name: contact_name
+        description: "Nome do ponto de contato ou responsável no fornecedor (Aceita nulos no banco)."
+
+      - name: email
+        description: "E-mail oficial de contato para compras e abastecimento (Aceita nulos no banco)."
+
+      - name: phone
+        description: "Telefone de contato do fornecedor (Aceita nulos no banco)."
+
+      - name: country
+        description: "País de origem ou sede onde o fornecedor está operando."
+        tests:
+          - not_null
+
+      - name: supplier_is_active
+        description: "Flag booleana indicando se o cadastro do fornecedor está ativo na plataforma."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

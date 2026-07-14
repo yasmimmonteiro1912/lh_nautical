@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_purchase_order_items
+    description: "Modelo de staging que limpa, tipa e prepara as linhas de itens individuais de pedidos de compra."
+    columns:
+      - name: purchase_order_item_id
+        description: "Chave primária padronizada para identificar unicamente a linha do item do pedido de compra."
+        tests:
+          - unique
+          - not_null
+
+      - name: purchase_order_id
+        description: "Chave estrangeira que vincula o item ao cabeçalho do pedido de compra (purchase_orders)."
+        tests:
+          - not_null
+
+      - name: product_variant_id
+        description: "Chave estrangeira que identifica a variante específica do produto comprado."
+        tests:
+          - not_null
+
+      - name: quantity_ordered
+        description: "Métrica numérica que indica a quantidade total de unidades solicitadas do produto."
+        tests:
+          - not_null
+
+      - name: unit_cost_original
+        description: "Custo unitário do item registrado na moeda nativa original do pedido (antes de conversões)."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_purchase_orders
+    description: "Modelo de staging para o cabeçalho dos pedidos de compra, contendo informações gerais de prazos, moedas e chaves de negócio."
+    columns:
+      - name: purchase_order_id
+        description: "Chave primária identificadora única do pedido de compra."
+        tests:
+          - unique
+          - not_null
+
+      - name: po_number
+        description: "Número identificador operacional do pedido de compra."
+        tests:
+          - not_null
+
+      - name: supplier_id
+        description: "Chave estrangeira que vincula o pedido ao fornecedor (suppliers)."
+        tests:
+          - not_null
+
+      - name: buyer_id
+        description: "Chave estrangeira que vincula o pedido ao funcionário comprador (dim_employee)."
+        tests:
+          - not_null
+
+      - name: destination_location_id
+        description: "Chave estrangeira que indica a filial de destino do estoque (dim_location)."
+        tests:
+          - not_null
+
+      - name: purchase_order_status
+        description: "Status do ciclo de vida do pedido (ex: draft, sent, received, cancelled)."
+        tests:
+          - not_null
+
+      - name: purchase_currency
+        description: "Código da moeda utilizada nas condições comerciais do pedido (ex: BRL, USD)."
+        tests:
+          - not_null
+
+      - name: placed_at
+        description: "Carimbo de data/hora que indica quando o pedido foi oficialmente emitido."
+        tests:
+          - not_null
+
+      - name: expected_delivery_at
+        description: "Data prevista para a entrega das mercadorias nas docas (Aceita nulos no banco)."
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

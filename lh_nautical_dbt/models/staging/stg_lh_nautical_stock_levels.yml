@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_stock_levels
+    description: "Modelo de staging contendo os níveis de estoque atuais por variante de produto e filial."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - product_variant_id
+            - location_id
+    columns:
+      - name: product_variant_id
+        description: "Chave estrangeira que vincula o registro à variante do produto (dim_product_variant)."
+        tests:
+          - not_null
+
+      - name: location_id
+        description: "Chave estrangeira que vincula o registro à localização ou filial física (dim_location)."
+        tests:
+          - not_null
+
+      - name: quantity_on_hand
+        description: "Métrica que indica a quantidade física de saldo disponível em estoque em tempo real."
+        tests:
+          - not_null
+
+      - name: reorder_point
+        description: "Ponto de ressuprimento. Nível mínimo de estoque que dispara o gatilho para novas compras (Aceita nulos no banco)."
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null
