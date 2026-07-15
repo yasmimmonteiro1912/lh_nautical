@@ -14,7 +14,6 @@ renamed as (
         , cast(postal_code as string) as postal_code
         , cast(street as string) as street
         , cast(number as string) as street_number
-        , cast(complement as string) as complement
         , cast(district as string) as district
         , cast(city as string) as city
         , cast(state as string) as customer_state
