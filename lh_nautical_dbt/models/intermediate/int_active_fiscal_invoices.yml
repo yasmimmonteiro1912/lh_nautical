@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: int_active_fiscal_invoices
+    description: "Trusted intermediate model that filters active fiscal invoices and zeroes out revenue for cancelled or rejected records."
+    columns:
+      - name: fiscal_invoice_id
+        description: "Primary key of the fiscal invoice."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        description: "Foreign key linking to the sales order."
+        data_tests:
+          - not_null
+
+      - name: nfe_number
+        description: "The official Brazilian electronic invoice identification number."
+        data_tests:
+          - not_null
+
+      - name: nfe_access_key
+        description: "The 44-digit electronic invoice access key."
+        data_tests:
+          - not_null
+
+      - name: nfe_series
+        description: "The series identifier of the electronic fiscal invoice."
+        data_tests:
+          - not_null
+
+      - name: issued_at
+        description: "The timestamp when the invoice was officially issued."
+        data_tests:
+          - not_null
+
+      - name: invoice_status
+        description: "The current state of the invoice. Expected values: 'authorized', 'cancelled', 'rejected'."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['authorized', 'cancelled', 'rejected']
+
+      - name: active_total_amount
+        description: "The calculated valid tax total amount. Evaluates to 0 if the invoice status is cancelled or rejected."
+        data_tests:
+          - not_null
+
+      - name: xml_storage_uri
+        description: "The storage S3 bucket URI path where the raw XML payload of the invoice is located."

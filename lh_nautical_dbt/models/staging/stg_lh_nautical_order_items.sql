@@ -11,7 +11,7 @@ with source_data as (
         cast(id as int) as order_item_id
         , cast(order_id as int) as order_id
         , cast(product_variant_id as int) as product_variant_id
-        , cast(quantity as decimal(14, 3)) as quantity
+        , cast(quantity as int) as quantity
         , cast(unit_price as decimal(14, 2)) as unit_price
         , cast(icms_rate as decimal(5, 2)) as icms_rate
         , cast(ipi_rate as decimal(5, 2)) as ipi_rate
