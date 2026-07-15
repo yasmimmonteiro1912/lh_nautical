@@ -13,6 +13,10 @@ models:
         description: "Identificador do tipo de pessoa (Ex: PF para Pessoa Física, PJ para Pessoa Jurídica)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['PF', 'PJ']
+              config:
+                severity: error
 
       - name: legal_name
         description: "Razão social ou nome completo do cliente."

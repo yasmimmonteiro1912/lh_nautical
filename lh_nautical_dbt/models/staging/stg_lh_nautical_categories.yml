@@ -17,10 +17,18 @@ models:
 
       - name: category_slug
         description: "Texto amigável (slug) associado à categoria para rotas de e-commerce."
+        tests:
+          - unique
+          - not_null
 
       - name: parent_category_id
         description: "Chave estrangeira de auto-relacionamento. Aponta para a categoria pai, permitindo estruturar hierarquias."
-
+        tests:
+          # This ensures every parent_category_id actually exists as a category_id in this same table
+          - relationships:
+              to: ref('stg_lh_nautical_categories')
+              field: category_id
+              
       - name: is_active
         description: "Indicador booleano que determina se a categoria está ativa no catálogo."
         tests:

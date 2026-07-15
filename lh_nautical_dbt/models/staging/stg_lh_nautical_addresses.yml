@@ -16,7 +16,13 @@ models:
           - not_null
 
       - name: address_type
-        description: "Tipo de endereço informado (Ex: Billing, Shipping, Residence)."
+        description: "Tipo de endereço informado (Ex: Billing, Secundary)."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['billing', 'secondary']
+              config:
+                severity: warn
 
       - name: postal_code
         description: "Código de Endereçamento Postal (CEP)."
