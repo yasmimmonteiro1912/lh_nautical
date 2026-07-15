@@ -17,3 +17,8 @@ models:
         description: "Tipo de dado do valor do atributo (Ex: text, number, boolean) utilizado para guiar o parse de dados na camada Gold."
         tests:
           - not_null
+          # Prevents unrecognized data types from entering our EAV pipeline
+          - accepted_values:
+              values: ['text', 'number', 'boolean']
+              config:
+                severity: error
