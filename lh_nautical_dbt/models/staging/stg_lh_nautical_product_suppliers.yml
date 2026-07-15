@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_product_suppliers
+    description: "Tabela de junção que mapeia o relacionamento entre variantes de produtos e seus fornecedores."
+    columns:
+      - name: product_variant_id
+        description: "Parte da chave composta identificando a variante do produto."
+        tests:
+          - not_null
+
+      - name: supplier_id
+        description: "Parte da chave composta identificando o fornecedor."
+        tests:
+          - not_null
+
+      - name: supplier_sku
+        description: "Código interno que o fornecedor utiliza para aquele produto."
+
+      - name: last_quoted_cost
+        description: "Último custo cotado ou cobrado por esse fornecedor."
+
+      - name: lead_time_days
+        description: "Tempo médio em dias para entrega do produto por este fornecedor."
+
+      - name: is_preferred
+        description: "Indicador se este é o fornecedor principal para essa variante."
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Data de criação do vínculo."
+        tests:
+          - not_null
+
+      - name: updated_at
+        description: "Data de alteração do vínculo."
+        tests:
+          - not_null
+          

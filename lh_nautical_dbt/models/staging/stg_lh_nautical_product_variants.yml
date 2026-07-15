@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_product_variants
+    description: "Tabela contendo os detalhes específicos e SKUs das variantes dos produtos."
+    columns:
+      - name: id
+        description: "Chave primária identificadora única da variante do produto."
+        tests:
+          - unique
+          - not_null
+
+      - name: product_id
+        description: "Chave estrangeira que vincula a variante ao produto pai."
+        tests:
+          - not_null
+
+      - name: sku
+        description: "Stock Keeping Unit - Código único de inventário da variante."
+        tests:
+          - unique
+          - not_null
+
+      - name: barcode_ean
+        description: "Código de barras global (EAN) da variante."
+
+      - name: sale_price
+        description: "Preço padrão de venda praticado para essa variante."
+        tests:
+          - not_null
+
+      - name: cost_price
+        description: "Preço base de custo de aquisição/produção da variante."
+        tests:
+          - not_null
+
+      - name: weight_kg
+        description: "Peso físico da variante expresso em quilogramas."
+
+      - name: icms_rate
+        description: "Alíquota padrão de ICMS associada a esta variante."
+        tests:
+          - not_null
+
+      - name: ipi_rate
+        description: "Alíquota padrão de IPI associada a esta variante."
+        tests:
+          - not_null
+
+      - name: is_active
+        description: "Se a variante está disponível para movimentação e venda no momento."
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Data de cadastro da variante."
+        tests:
+          - not_null
+
+      - name: updated_at
+        description: "Data de última alteração dos dados da variante."
+        tests:
+          - not_null
+          

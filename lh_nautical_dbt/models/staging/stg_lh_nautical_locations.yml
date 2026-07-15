@@ -1,0 +1,74 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_locations
+    description: "Tabela contendo os dados de localização física e galpões/estoques."
+    columns:
+      - name: id
+        description: "Chave primária identificadora única da localização."
+        tests:
+          - unique
+          - not_null
+
+      - name: name
+        description: "Nome descritivo do local ou filial."
+        tests:
+          - not_null
+
+      - name: location_type
+        description: "Tipo de estabelecimento (ex: Galpão, Loja, Depósito)."
+        tests:
+          - not_null
+
+      - name: postal_code
+        description: "Código postal / CEP do local."
+        tests:
+          - not_null
+
+      - name: street
+        description: "Nome da rua/avenida do endereço."
+        tests:
+          - not_null
+
+      - name: number
+        description: "Número do imóvel ou lote da localização."
+        tests:
+          - not_null
+
+      - name: complement
+        description: "Complemento do endereço (bloco, sala, etc.)."
+
+      - name: district
+        description: "Bairro do estabelecimento."
+        tests:
+          - not_null
+
+      - name: city
+        description: "Cidade onde a filial está localizada."
+        tests:
+          - not_null
+
+      - name: state
+        description: "Unidade Federativa / Estado (sigla)."
+        tests:
+          - not_null
+
+      - name: country
+        description: "País onde o estabelecimento está localizado."
+        tests:
+          - not_null
+
+      - name: is_active
+        description: "Indicador booleano se a localização está ativa e operacional."
+        tests:
+          - not_null
+
+      - name: created_at
+        description: "Data de criação do registro de localização."
+        tests:
+          - not_null
+
+      - name: updated_at
+        description: "Data da última atualização do registro de localização."
+        tests:
+          - not_null
