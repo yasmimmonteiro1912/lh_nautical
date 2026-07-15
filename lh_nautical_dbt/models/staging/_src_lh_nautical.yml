@@ -76,3 +76,5 @@ sources:
 
       - name: variant_attribute_values
         description: "Valores reais atribuídos para cada combinação de variante de produto e atributo."
+      - name: taxas_cambio
+        description: "Tabela bruta contendo as cotações unificadas do Dólar e Euro vindas da API do Bacen."

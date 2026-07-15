@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_taxas_cambio
+    description: "Modelo de staging contendo as taxas de câmbio diárias oficiais (PTAX de Fechamento) do Dólar (USD) e Euro (EUR) obtidas via API do Banco Central."
+    columns:
+      - name: data_hora_cotacao
+        description: "Carimbo de data/hora (timestamp) oficial de homologação do boletim PTAX de fechamento do Banco Central."
+        tests:
+          - unique
+          - not_null
+
+      - name: cotacao_compra_dolar
+        description: "Cotação de compra do Dólar Americano (USD) expressa em Reais (BRL)."
+        tests:
+          - not_null
+
+      - name: cotacao_venda_dolar
+        description: "Cotação de venda do Dólar Americano (USD) expressa em Reais (BRL)."
+        tests:
+          - not_null
+
+      - name: cotacao_compra_euro
+        description: "Cotação de compra do Euro (EUR) expressa em Reais (BRL)."
+        tests:
+          - not_null
+
+      - name: cotacao_venda_euro
+        description: "Cotação de venda do Euro (EUR) expressa em Reais (BRL)."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora local que registra o momento exato em que a cotação foi integrada na camada Bronze."
+        tests:
+          - not_null
