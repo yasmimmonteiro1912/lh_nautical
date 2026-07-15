@@ -31,12 +31,28 @@ models:
           - not_null
 
       - name: return_status
-        description: "Status atual do processo de devolução (ex: open, completed, cancelled)."
+        description: "Status atual do processo de devolução (open, completed, cancelled)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['open', 'completed', 'cancelled']
+              config:
+                severity: error
 
       - name: return_reason
-        description: "O motivo alegado pelo cliente para realizar a devolução do produto (Aceita nulos no banco)."
+        description: "O motivo consolidado e padronizado alegado pelo cliente para realizar a devolução do produto."
+        tests:
+          - accepted_values:
+              values:
+                - 'cliente_desistiu'
+                - 'compra_duplicada'
+                - 'item_divergente_da_descricao'
+                - 'produto_avariado_transporte'
+                - 'tamanho_cor_incorreto'
+                - 'defeito_de_fabrica'
+                - 'outros'
+              config:
+                severity: warn
 
       - name: returned_at
         description: "Carimbo de data/hora que indica quando a devolução foi aberta."

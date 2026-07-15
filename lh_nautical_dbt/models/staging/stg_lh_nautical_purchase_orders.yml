@@ -2,51 +2,59 @@ version: 2
 
 models:
   - name: stg_lh_nautical_purchase_orders
-    description: "Modelo de staging para o cabeçalho dos pedidos de compra, contendo informações gerais de prazos, moedas e chaves de negócio."
+    description: "Modelo de staging contendo as informações de cabeçalho dos pedidos de compra realizados com os fornecedores."
     columns:
       - name: purchase_order_id
-        description: "Chave primária identificadora única do pedido de compra."
+        description: "Chave primária que identifica unicamente o pedido de compra."
         tests:
           - unique
           - not_null
 
       - name: po_number
-        description: "Número identificador operacional do pedido de compra."
+        description: "Número do documento de compra gerado pelo ERP."
         tests:
           - not_null
 
       - name: supplier_id
-        description: "Chave estrangeira que vincula o pedido ao fornecedor (suppliers)."
+        description: "Chave estrangeira que vincula o pedido ao fornecedor (stg_lh_nautical_suppliers)."
         tests:
           - not_null
 
       - name: buyer_id
-        description: "Chave estrangeira que vincula o pedido ao funcionário comprador (dim_employee)."
+        description: "Chave estrangeira que identifica o comprador interno da LH Nautical."
         tests:
           - not_null
 
       - name: destination_location_id
-        description: "Chave estrangeira que indica a filial de destino do estoque (dim_location)."
+        description: "Chave estrangeira que indica a filial de destino para entrega física das mercadorias."
         tests:
           - not_null
 
       - name: purchase_order_status
-        description: "Status do ciclo de vida do pedido (ex: draft, sent, received, cancelled)."
+        description: "Status do ciclo de vida do pedido de compra no ERP."
         tests:
           - not_null
+          - accepted_values:
+              values: ['draft', 'sent', 'partially_received', 'received', 'cancelled']
+              config:
+                severity: error
 
       - name: purchase_currency
-        description: "Código da moeda utilizada nas condições comerciais do pedido (ex: BRL, USD)."
+        description: "Código ISO da moeda utilizada na negociação financeira do pedido de compra."
         tests:
           - not_null
+          - accepted_values:
+              values: ['BRL', 'USD', 'EUR']
+              config:
+                severity: error
 
       - name: placed_at
-        description: "Carimbo de data/hora que indica quando o pedido foi oficialmente emitido."
+        description: "Data e hora de emissão/criação do pedido de compra."
         tests:
           - not_null
 
       - name: expected_delivery_at
-        description: "Data prevista para a entrega das mercadorias nas docas (Aceita nulos no banco)."
+        description: "Data estimada para recebimento físico das mercadorias no armazém."
 
       - name: ingestion_timestamp
         description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."

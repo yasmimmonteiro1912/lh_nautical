@@ -23,6 +23,10 @@ models:
         description: "Métrica que indica a quantidade física de saldo disponível em estoque em tempo real."
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                severity: warn
 
       - name: reorder_point
         description: "Ponto de ressuprimento. Nível mínimo de estoque que dispara o gatilho para novas compras (Aceita nulos no banco)."

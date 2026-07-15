@@ -24,9 +24,13 @@ models:
         description: "Chave estrangeira que identifica o funcionário operador responsável pelo ajuste (Aceita nulos no banco)."
 
       - name: movement_type
-        description: "Tipo de movimentação realizada (ex: return_in, return_out, manual_adjustment)."
+        description: "Tipo de movimentação realizada (ex: return_in, return_out, sale_out, purchase_in)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['return_in', 'return_out', 'sale_out', 'purchase_in']
+              config:
+                severity: error
 
       - name: reference_table
         description: "Identifica a tabela ou documento do ERP que disparou o gatilho físico (Aceita nulos no banco)."

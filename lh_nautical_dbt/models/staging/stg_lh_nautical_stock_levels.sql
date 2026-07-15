@@ -1,3 +1,10 @@
+-- =====================================================================
+-- Model: stg_lh_nautical_stock_levels
+-- Description: Cleans, standardizes, and formats physical stock levels.
+--              - Retains raw negative values to preserve data lineage 
+--                and allow business auditability of inventory anomalies.
+-- =====================================================================
+
 with source_data as (
 
     select *
@@ -5,7 +12,7 @@ with source_data as (
 
 )
 
-, renamed as (
+, cleaned_records as (
 
     select
         cast(product_variant_id as int) as product_variant_id
@@ -17,5 +24,10 @@ with source_data as (
 
 )
 
-select *
-from renamed
+select
+    product_variant_id
+    , location_id
+    , quantity_on_hand
+    , reorder_point
+    , ingestion_timestamp
+from cleaned_records
