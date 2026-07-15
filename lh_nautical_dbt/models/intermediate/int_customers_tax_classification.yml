@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: int_customers_tax_classification
+    description: "Intermediate model that classifies customer tax profiles for tax calculation purposes."
+    columns:
+      - name: customer_id
+        description: "Primary key linking to the customer."
+        tests:
+          - unique
+          - not_null
+
+      - name: tax_id_type
+        description: "Classification of the tax identifier. Expected values: 'CPF' or 'CNPJ'."
+        tests:
+          - accepted_values:
+              values: ['CPF', 'CNPJ', 'INVALID_TAX_ID']
+
+      - name: state_tax_status
+        description: "Tax status under state regulations. Expected values: 'Contributor', 'Exempt', or 'Non-Contributor'."
+        tests:
+          - accepted_values:
+              values: ['Contributor', 'Exempt', 'Non-Contributor']

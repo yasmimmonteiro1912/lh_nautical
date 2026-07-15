@@ -28,12 +28,19 @@ models:
     +file_format: delta
     
     # Camada Staging (Seus dados limpos vindos da ingestão bronze)
-    # DRY: Definimos que tudo dentro de staging vira VIEW automaticamente.
-    # Evita que você precise escrever {{ config(materialized='view') }} em todos os arquivos!
+    # Directs all models inside the "staging" folder to the "silver" schema as views
     staging:
       +materialized: view
+      +schema: silver
+      
+    # Camada Intermediate (Seus modelos de regras de negócio confiáveis)
+    # Directs all models inside the "intermediate" folder to the "silver" schema as views
+    intermediate:
+      +materialized: view
+      +schema: silver
       
     # Camada Marts (Onde ficarão seus Fatos e Dimensões prontos para o negócio)
-    # DRY: Tudo aqui dentro vira TABELA Delta otimizada de forma automática.
+    # Directs all models inside the "marts" folder to the "gold" schema as tables
     marts:
       +materialized: table
+      +schema: gold

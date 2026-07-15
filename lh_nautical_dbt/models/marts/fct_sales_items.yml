@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: fct_sales_items
+    description: "Fact table containing item-level sales transactions, resolved with surrogate keys and enriched with fiscal invoice data."
+    columns:
+      - name: sales_item_sk
+        description: "Primary surrogate key generated from hashing the unique order item identifier."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: date_sk
+        description: "Surrogate key pointing to the dim_date dimension."
+        data_tests:
+          - not_null
+          # -- UNCOMMENT WHEN DIMENSION IS CREATED --
+          # - relationships:
+          #     to: ref('dim_date')
+          #     field: date_sk
+
+      - name: customer_sk
+        description: "Surrogate key pointing to the dim_customer dimension."
+        data_tests:
+          - not_null
+          # -- UNCOMMENT WHEN DIMENSION IS CREATED --
+          # - relationships:
+          #     to: ref('dim_customer')
+          #     field: customer_sk
+
+      - name: variant_sk
+        description: "Surrogate key pointing to the dim_product_variant dimension."
+        data_tests:
+          - not_null
+          # -- UNCOMMENT WHEN DIMENSION IS CREATED --
+          # - relationships:
+          #     to: ref('dim_product_variant')
+          #     field: variant_sk
+
+      - name: location_sk
+        description: "Surrogate key pointing to the dim_location dimension."
+        data_tests:
+          - not_null
+          # -- UNCOMMENT WHEN DIMENSION IS CREATED --
+          # - relationships:
+          #     to: ref('dim_location')
+          #     field: location_sk
+
+      - name: employee_sk
+        description: "Surrogate key pointing to the dim_employee dimension."
+        data_tests:
+          - not_null
+          # -- UNCOMMENT WHEN DIMENSION IS CREATED --
+          # - relationships:
+          #     to: ref('dim_employee')
+          #     field: employee_sk
+
+      - name: gross_revenue
+        description: "Calculated gross revenue before discounts (quantity * unit_price)."
+        data_tests:
+          - not_null
+
+      - name: net_revenue
+        description: "Calculated net revenue utilizing item line totals."
+        data_tests:
+          - not_null
