@@ -11,7 +11,7 @@ models:
           - not_null
 
       - name: return_id
-        description: "Chave estrangeira que vincula o item ao cabeçalho da devolução (returns)."
+        description: "Chave estrangeira que vincula o item ao cabeçalho da devolução (stg_lh_nautical_returns)."
         tests:
           - not_null
 
@@ -24,6 +24,10 @@ models:
         description: "Ação aplicada ao item devolvido (ex: refund para reembolso, exchange para troca)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['refund', 'exchange']
+              config:
+                severity: error
 
       - name: exchange_variant_id
         description: "Chave estrangeira que identifica a nova variante do produto enviado em caso de troca física (Aceita nulos no banco)."
@@ -32,11 +36,21 @@ models:
         description: "Métrica que indica a quantidade de unidades que foram devolvidas pelo cliente."
         tests:
           - not_null
+          # Alerta se a quantidade devolvida for menor ou igual a zero (anomalia de lançamento)
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+              config:
+                severity: warn
 
       - name: unit_refund_amount
         description: "Métrica financeira que indica o valor unitário de reembolso a ser estornado."
         tests:
           - not_null
+          # Alerta se o valor do reembolso vier negativo por erro do sistema
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                severity: warn
 
       - name: ingestion_timestamp
         description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."

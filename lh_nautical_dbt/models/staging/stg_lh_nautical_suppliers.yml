@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: stg_lh_nautical_suppliers
-    description: "Tabela mestre contendo o cadastro transacional e os dados fiscais de todos os fornecedores."
+    description: "Tabela mestre contendo o cadastro transacional e os dados fiscais de todos os fornecedores nacionais e internacionais."
     columns:
       - name: supplier_id
         description: "Chave primária identificadora única do fornecedor no sistema de origem."
@@ -19,10 +19,15 @@ models:
         description: "Nome Fantasia comercial do parceiro fornecedor (Aceita nulos no banco)."
 
       - name: tax_id
-        description: "Código de identificação fiscal do fornecedor (Aceita nulos no banco)."
+        description: "Código de identificação fiscal do fornecedor (Alfanumérico para aceitar VATs internacionais)."
 
       - name: tax_id_type
-        description: "Tipo de documento fiscal utilizado para a validação (Aceita nulos no banco)."
+        description: "Tipo de documento fiscal utilizado para a validação (cnpj ou vat)."
+        tests:
+          - accepted_values:
+              values: ['cnpj', 'vat']
+              config:
+                severity: error
 
       - name: contact_name
         description: "Nome do ponto de contato ou responsável no fornecedor (Aceita nulos no banco)."
@@ -31,12 +36,16 @@ models:
         description: "E-mail oficial de contato para compras e abastecimento (Aceita nulos no banco)."
 
       - name: phone
-        description: "Telefone de contato do fornecedor (Aceita nulos no banco)."
+        description: "Telefone de contato do fornecedor, normalizado respeitando as regras de telefonia nacionais e internacionais."
 
       - name: country
-        description: "País de origem ou sede onde o fornecedor está operando."
+        description: "País de origem ou sede onde o fornecedor está operando (BR, FR, IT)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['BR', 'FR', 'IT']
+              config:
+                severity: warn
 
       - name: supplier_is_active
         description: "Flag booleana indicando se o cadastro do fornecedor está ativo na plataforma."

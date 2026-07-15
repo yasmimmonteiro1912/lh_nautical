@@ -2,33 +2,41 @@ version: 2
 
 models:
   - name: stg_lh_nautical_purchase_order_items
-    description: "Modelo de staging que limpa, tipa e prepara as linhas de itens individuais de pedidos de compra."
+    description: "Modelo de staging contendo os itens detalhados de cada pedido de compra, com quantidades e custos unitários."
     columns:
       - name: purchase_order_item_id
-        description: "Chave primária padronizada para identificar unicamente a linha do item do pedido de compra."
+        description: "Chave primária que identifica unicamente o item do pedido de compra."
         tests:
           - unique
           - not_null
 
       - name: purchase_order_id
-        description: "Chave estrangeira que vincula o item ao cabeçalho do pedido de compra (purchase_orders)."
+        description: "Chave estrangeira que vincula o item ao cabeçalho do pedido (stg_lh_nautical_purchase_orders)."
         tests:
           - not_null
 
       - name: product_variant_id
-        description: "Chave estrangeira que identifica a variante específica do produto comprado."
+        description: "Chave estrangeira que vincula o item à variante do produto correspondente."
         tests:
           - not_null
 
       - name: quantity_ordered
-        description: "Métrica numérica que indica a quantidade total de unidades solicitadas do produto."
+        description: "Quantidade de itens encomendados no pedido."
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+              config:
+                severity: warn
 
-      - name: unit_cost_original
-        description: "Custo unitário do item registrado na moeda nativa original do pedido (antes de conversões)."
+      - name: unit_cost
+        description: "Custo unitário do item na moeda negociada no cabeçalho do pedido."
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              config:
+                severity: warn
 
       - name: ingestion_timestamp
         description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
