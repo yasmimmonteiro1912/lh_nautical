@@ -4,7 +4,7 @@ models:
   - name: stg_lh_nautical_product_variants
     description: "Tabela contendo os detalhes específicos e SKUs das variantes dos produtos."
     columns:
-      - name: id
+      - name: product_variant_id
         description: "Chave primária identificadora única da variante do produto."
         tests:
           - unique
@@ -51,6 +51,10 @@ models:
         description: "Se a variante está disponível para movimentação e venda no momento."
         tests:
           - not_null
+          - accepted_values:
+              values: [true, false]
+              config:
+                severity: warn
 
       - name: created_at
         description: "Data de cadastro da variante."

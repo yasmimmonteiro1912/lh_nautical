@@ -4,7 +4,7 @@ models:
   - name: stg_lh_nautical_goods_receipts
     description: "Tabela contendo os registros de recebimento físico de mercadorias no estoque."
     columns:
-      - name: id
+      - name: goods_receipt_id
         description: "Chave primária identificadora única do recebimento de mercadorias."
         tests:
           - unique
