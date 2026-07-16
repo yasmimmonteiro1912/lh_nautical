@@ -16,7 +16,12 @@ with source_data as (
         , cast(location_id as int) as location_id
         , cast(status as string) as status
         , cast(subtotal as decimal(14, 2)) as subtotal
-        , cast(discount_amount as decimal(14, 2)) as discount_amount
+
+        -- Garante que se o desconto for nulo, ele seja tratado como 0.00.
+        , cast(
+            coalesce(discount_amount, 0.00) as decimal(14, 2)
+        ) as discount_amount
+
         , cast(total as decimal(14, 2)) as total
         , cast(placed_at as timestamp) as placed_at
         , cast(created_at as timestamp) as created_at

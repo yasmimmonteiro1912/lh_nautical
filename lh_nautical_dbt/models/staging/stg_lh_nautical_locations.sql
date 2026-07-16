@@ -11,7 +11,16 @@ with source_data as (
         cast(id as int) as location_id
         , cast(name as string) as location_name
         , cast(location_type as string) as location_type
-        , cast(postal_code as string) as postal_code
+
+        -- PADRONIZAÇÃO DO CEP (Apenas números e exatamente 8 dígitos)
+        -- Ex: '50.012-345', '50 012 345' ou '50012-345' -> '50012345'
+        -- Nota: Mantemos sem hífen no Staging/Intermediate para facilitar
+        -- buscas e APIs de frete. Formatações visuais (ex: '-' do CEP)
+        -- podem ser feitas apenas na camada de visualização (BI) ou Trusted
+        , cast(
+            lpad(regexp_replace(postal_code, '[^0-9]', ''), 8, '0') as string
+        ) as postal_code
+
         , cast(street as string) as street
         , cast(number as string) as location_number
         , cast(complement as string) as complement
