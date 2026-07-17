@@ -19,6 +19,7 @@ renamed as (
         , cast(state as string) as customer_state
         , cast(country as string) as country
         , cast(is_primary as boolean) as is_primary
+        , cast(ingestion_timestamp as timestamp) as ingestion_timestamp
     from source_addresses
 
 )

@@ -15,6 +15,7 @@ renamed as (
         , cast(parent_category_id as int) as parent_category_id  
         -- Converte o tipo bit (0/1) da origem para lógico
         , cast(is_active as boolean) as is_active 
+        , cast(ingestion_timestamp as timestamp) as ingestion_timestamp
     from source_categories
 
 )

@@ -22,6 +22,7 @@ renamed as (
         , cast(is_active as boolean) as is_active 
         , cast(created_at as timestamp) as created_at
         , cast(updated_at as timestamp) as updated_at
+        , cast(ingestion_timestamp as timestamp) as ingestion_timestamp
     from source_customers
 
 )

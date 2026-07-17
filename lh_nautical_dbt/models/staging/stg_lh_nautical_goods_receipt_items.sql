@@ -12,6 +12,7 @@ renamed as (
         , cast(goods_receipt_id as int) as goods_receipt_id
         , cast(purchase_order_item_id as int) as purchase_order_item_id
         , cast(quantity_received as decimal(14, 3)) as quantity_received
+        , cast(ingestion_timestamp as timestamp) as ingestion_timestamp
     from source_goods_receipt_items
 
 )

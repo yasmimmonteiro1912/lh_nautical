@@ -14,6 +14,7 @@ renamed as (
         , cast(country as string) as brand_country 
         -- Transforma o tipo bit (0/1) em Boolean (true/false)
         , cast(is_active as boolean) as is_active 
+        , cast(ingestion_timestamp as timestamp) as ingestion_timestamp
     from source_brands
 
 )

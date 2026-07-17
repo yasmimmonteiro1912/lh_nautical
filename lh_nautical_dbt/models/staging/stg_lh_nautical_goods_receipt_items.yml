@@ -2,41 +2,28 @@ version: 2
 
 models:
   - name: stg_lh_nautical_goods_receipt_items
-    description: "Modelo de staging que limpa, tipa e prepara as linhas de entrada de mercadorias recebidas dos fornecedores."
+    description: "Modelo de staging corrigido mapeando apenas os atributos físicos reais do recebimento."
     columns:
       - name: goods_receipt_item_id
-        description: "Chave primária padronizada para identificar unicamente a linha do item recebido."
+        description: "Chave primária da linha do item recebido."
         tests:
           - unique
           - not_null
 
       - name: goods_receipt_id
-        description: "Chave estrangeira que associa o item ao documento de cabeçalho do recebimento (Goods Receipt)."
+        description: "Chave estrangeira do cabeçalho da carga."
         tests:
           - not_null
 
-      - name: variant_id
-        description: "Chave estrangeira (Business Key) que aponta para a variante de produto recebida."
+      - name: purchase_order_item_id
+        description: "Chave de amarração com a Ordem de Compra. É ela que usaremos no Mart para buscar o variant_id e os custos!"
         tests:
           - not_null
 
       - name: quantity_received
-        description: "Quantidade física de itens que deu entrada no estoque durante a descarga."
+        description: "Volume físico que entrou no estoque."
         tests:
           - not_null
 
-      - name: unit_cost
-        description: "Preço de custo unitário faturado pelo fornecedor para o item."
-        tests:
-          - not_null
-
-      - name: total_item_cost
-        description: "Valor total do item recebido calculada por: Quantidade Recebida * Preço de Custo Unitário."
-        tests:
-          - not_null
-
-      - name: created_at
-        description: "Carimbo de data e hora do registro da entrada física no estoque."
-
-      - name: updated_at
-        description: "Carimbo de data e hora da última atualização cadastral do recebimento."
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora da ingestão."
