@@ -51,3 +51,8 @@ models:
 
       - name: updated_at
         description: "Carimbo de data e hora que indica a última atualização do registro de cliente."
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

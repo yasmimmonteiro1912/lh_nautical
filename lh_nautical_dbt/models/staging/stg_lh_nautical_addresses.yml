@@ -50,3 +50,8 @@ models:
 
       - name: is_primary
         description: "Indicador lógico que determina se este é o endereço principal de faturamento/entrega do cliente."
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

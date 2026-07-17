@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_employees
+    description: "Modelo de staging que limpa, tipa e padroniza os metadados cadastrais do time de colaboradores."
+    columns:
+      - name: employee_id
+        description: "Chave primária padronizada e higienizada do funcionário."
+        tests:
+          - unique
+          - not_null
+
+      - name: employee_full_name
+        description: "Nome completo do colaborador."
+        tests:
+          - not_null
+
+      - name: employee_cpf
+        description: "Documento de identificação CPF do colaborador (chave única natural)."
+        tests:
+          - unique
+          - not_null
+
+      - name: employee_email
+        description: "Endereço eletrônico corporativo ou pessoal do funcionário."
+
+      - name: employee_role
+        description: "Cargo ou função desempenhada pelo colaborador (Ex: Vendedor, Gerente)."
+        tests:
+          - not_null
+
+      - name: primary_location_id
+        description: "Chave estrangeira que conecta o funcionário à sua filial física ou galpão de origem."
+
+      - name: hire_date
+        description: "Data formal de contratação do funcionário."
+        tests:
+          - not_null
+
+      - name: termination_date
+        description: "Data de desligamento ou rescisão contratual (Fica vazia para funcionários ativos)."
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

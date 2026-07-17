@@ -60,4 +60,9 @@ models:
         description: "Data da última atualização do produto."
         tests:
           - not_null
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null
           

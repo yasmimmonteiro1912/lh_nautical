@@ -16,6 +16,7 @@ renamed as (
         , cast(primary_location_id as int) as primary_location_id
         , cast(hire_date as date) as hire_date
         , cast(termination_date as date) as termination_date
+        , cast(ingestion_timestamp as timestamp) as ingestion_timestamp
     from source_data
 
 )

@@ -40,3 +40,8 @@ models:
         description: "Valor bruto total do faturamento homologado na nota fiscal, vital para reconciliações com a fct_sales_items."
         tests:
           - not_null
+      
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora que registra o momento exato da ingestão do dado bruto na camada Bronze."
+        tests:
+          - not_null

@@ -19,6 +19,7 @@ renamed as (
         , cast(xml_storage_uri as string) as xml_storage_uri
         , cast(created_at as timestamp) as created_at
         , cast(updated_at as timestamp) as updated_at
+        , cast(ingestion_timestamp as timestamp) as ingestion_timestamp
     from source_fiscal_invoices
 
 )
