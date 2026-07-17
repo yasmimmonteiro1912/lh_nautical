@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: int_lh_nautical_variant_attributes_pivoted
+  - name: int_variant_attributes_pivoted
     description: "Trusted intermediate model that flattens the Entity-Attribute-Value (EAV) table from product variants into a horizontal schema, optimizing data quality and types."
     columns:
       - name: product_variant_id
