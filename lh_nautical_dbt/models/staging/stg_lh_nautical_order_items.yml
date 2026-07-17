@@ -2,9 +2,15 @@ version: 2
 
 models:
   - name: stg_lh_nautical_order_items
-    description: "Itens de detalhe que compõem cada um dos pedidos de venda."
+    description: "Itens de detalhe que compõem cada um dos pedidos de venda. Por ser uma tabela de relacionamento N:N, a combinação de Pedido + Produto deve ser única para evitar duplicados."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - order_id
+            - product_variant_id
+    
     columns:
-      - name: id
+      - name: order_item_id
         description: "Chave primária do item do pedido."
         tests:
           - unique

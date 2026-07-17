@@ -4,7 +4,7 @@ models:
   - name: stg_lh_nautical_payments
     description: "Transações financeiras de pagamento vinculadas aos pedidos faturados."
     columns:
-      - name: id
+      - name: payment_id
         description: "Chave primária do pagamento cadastrado."
         tests:
           - unique
@@ -15,25 +15,41 @@ models:
         tests:
           - not_null
 
-      - name: method
+      - name: payment_method
         description: "Meio de pagamento empregado (Credit Card, Boleto, PIX, etc.)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['credit_card', 'boleto', 'pix', 'debit_card', 'cash', 'bank_transfer']
+              config:
+                severity: warn
 
       - name: installments
         description: "Número de parcelas acordadas para liquidação."
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+              config:
+                severity: warn
 
-      - name: amount
+      - name: payment_amount
         description: "Montante transacionado nesta forma de pagamento."
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+              config:
+                severity: warn
 
-      - name: status
+      - name: payment_status
         description: "Status da transação de pagamento (ex: Approved, Pending, Refunded)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['approved', 'pending', 'refunded', 'refused']
+              config:
+                severity: warn
 
       - name: paid_at
         description: "Data/hora de liquidação financeira confirmada."

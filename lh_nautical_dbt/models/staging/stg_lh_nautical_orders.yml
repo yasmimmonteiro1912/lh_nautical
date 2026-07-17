@@ -4,7 +4,7 @@ models:
   - name: stg_lh_nautical_orders
     description: "Tabela de cabeçalho dos pedidos de venda contendo totais, status e canais."
     columns:
-      - name: id
+      - name: order_id
         description: "Chave primária identificadora única do pedido."
         tests:
           - unique
@@ -20,6 +20,10 @@ models:
         description: "Canal por onde a venda ocorreu (ex: Loja Física, E-commerce)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['ecommerce', 'pos']
+              config:
+                severity: warn
 
       - name: customer_id
         description: "Chave estrangeira que identifica o cliente comprador."
@@ -38,6 +42,10 @@ models:
         description: "Status do processamento do pedido (ex: Shipped, Cancelled)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['paid', 'confirmed', 'cancelled', 'draft']
+              config:
+                severity: warn
 
       - name: subtotal
         description: "Valor total dos itens antes dos descontos aplicados."

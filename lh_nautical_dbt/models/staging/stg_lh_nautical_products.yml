@@ -4,18 +4,18 @@ models:
   - name: stg_lh_nautical_products
     description: "Tabela mestre contendo as informações gerais e cadastrais dos produtos."
     columns:
-      - name: id
+      - name: product_id
         description: "Chave primária identificadora única do produto."
         tests:
           - unique
           - not_null
 
-      - name: name
+      - name: product_name
         description: "Nome comercial/mestre do produto pai."
         tests:
           - not_null
 
-      - name: description
+      - name: product_description
         description: "Descrição detalhada técnica ou comercial do produto."
 
       - name: brand_id
@@ -37,11 +37,19 @@ models:
         description: "Unidade de medida padrão do produto (ex: UN, KG, CX)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['L', 'M', 'PC', 'UN', 'KG', 'CX']
+              config:
+                severity: warn
 
       - name: is_active
         description: "Se o produto mestre está ativo na base."
         tests:
           - not_null
+          - accepted_values:
+              values: [true, false]
+              config:
+                severity: warn
 
       - name: created_at
         description: "Data de criação do produto mestre."

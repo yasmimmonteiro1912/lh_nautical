@@ -4,13 +4,13 @@ models:
   - name: stg_lh_nautical_locations
     description: "Tabela contendo os dados de localização física e galpões/estoques."
     columns:
-      - name: id
+      - name: location_id
         description: "Chave primária identificadora única da localização."
         tests:
           - unique
           - not_null
 
-      - name: name
+      - name: location_name
         description: "Nome descritivo do local ou filial."
         tests:
           - not_null
@@ -19,6 +19,10 @@ models:
         description: "Tipo de estabelecimento (ex: Galpão, Loja, Depósito)."
         tests:
           - not_null
+          - accepted_values:
+              values: ['store', 'warehouse']
+              config:
+                severity: warn
 
       - name: postal_code
         description: "Código postal / CEP do local."
@@ -30,7 +34,7 @@ models:
         tests:
           - not_null
 
-      - name: number
+      - name: location_number
         description: "Número do imóvel ou lote da localização."
         tests:
           - not_null
@@ -48,20 +52,32 @@ models:
         tests:
           - not_null
 
-      - name: state
+      - name: location_state
         description: "Unidade Federativa / Estado (sigla)."
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: "like '__'"  # Teste para 2 dígitos (sigla do estado)
+              config:
+                severity: warn
 
       - name: country
         description: "País onde o estabelecimento está localizado."
         tests:
           - not_null
+          - accepted_values:
+              values: ['BR']
+              config:
+                severity: warn
 
       - name: is_active
         description: "Indicador booleano se a localização está ativa e operacional."
         tests:
           - not_null
+          - accepted_values:
+              values: [true, false]
+              config:
+                severity: warn
 
       - name: created_at
         description: "Data de criação do registro de localização."

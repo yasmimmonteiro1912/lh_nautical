@@ -2,7 +2,13 @@ version: 2
 
 models:
   - name: stg_lh_nautical_product_suppliers
-    description: "Tabela de junção que mapeia o relacionamento entre variantes de produtos e seus fornecedores."
+    description: "Tabela de junção que mapeia o relacionamento entre variantes de produtos e seus fornecedores. Por ser uma tabela de relacionamento N:N, a combinação de Produto + Fornecedor deve ser única para evitar duplicados."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - product_variant_id
+            - supplier_id
+    
     columns:
       - name: product_variant_id
         description: "Parte da chave composta identificando a variante do produto."
@@ -27,6 +33,10 @@ models:
         description: "Indicador se este é o fornecedor principal para essa variante."
         tests:
           - not_null
+          - accepted_values:
+              values: [true, false]
+              config:
+                severity: warn
 
       - name: created_at
         description: "Data de criação do vínculo."
