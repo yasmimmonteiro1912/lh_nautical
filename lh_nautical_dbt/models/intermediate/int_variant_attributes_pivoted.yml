@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: int_variant_attributes_pivoted
+    description: "Trusted intermediate model that flattens the Entity-Attribute-Value (EAV) table from product variants into a horizontal schema, optimizing data quality and types."
+    columns:
+      - name: product_variant_id
+        description: "Primary key identifying the unique product variant (SKU)."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_color
+        description: "The text specification representing the color of the product variant."
+
+      - name: product_size
+        description: "The text specification representing the size or dimensions label of the product variant."
+
+      - name: length_m
+        description: "The product length converted and measured in meters (double)."
+
+      - name: power_hp
+        description: "The propulsion capacity measured in Horsepower (double)."
+
+      - name: voltage_v
+        description: "The electrical operating voltage specification (double)."
+
+      - name: attribute_weight_kg
+        description: "The physical weight of the product recorded dynamically inside the specifications catalog (double)."
+
+      - name: is_waterproof
+        description: "Boolean flag determining if the variant is certified as waterproof."
+
+      - name: product_material
+        description: "The raw material composition attribute of the technical specification."
+
+      - name: ingestion_timestamp
+        description: "The baseline historical execution timestamp fetched from the bronze layer."
+        data_tests:
+          - not_null
