@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: int_cep_locations
+    description: "Intermediate model: cleaned `locations` with postal-code (CEP) quality flags used by `dim_location`."
+    columns:
+      - name: location_id
+        description: "Natural key of the store / location."
+        data_tests:
+          - not_null
+
+      - name: location_name
+        description: "Business name of the location."
+
+      - name: location_type
+        description: "Type of location (e.g., warehouse, store, office)."
+
+      - name: postal_code
+        description: "Raw numeric-only postal code (CEP) used for matching and validation."
+
+      - name: street
+        description: "Street name of the location."
+
+      - name: location_number
+        description: "Street number of the location."
+      
+      - name: complement
+        description: "Address complement."
+
+      - name: district
+        description: "Neighborhood or district."
+      
+      - name: city
+        description: "City of the location."
+      
+      - name: location_state
+        description: "State (UF) of the location."
+      
+      - name: country
+        description: "Country associated with the location."
+
+      - name: is_active
+        description: "Flag indicating whether the location is active."
+      
+      - name: is_valid_postal_code
+        description: "Flag indicating postal code passes basic validity (8 numeric digits)."
+
+      - name: has_complete_geography
+        description: "Flag indicating postal code + city + state are present."
+
+      - name: ingestion_timestamp
+        description: "Source ingestion timestamp, if available."
