@@ -1,0 +1,73 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "Gold dimension model for customers. Contains master data, tax classifications, and primary address details for analytical querying without the need for additional joins."
+    columns:
+      - name: customer_sk
+        description: "Surrogate key generated via MD5 hash of the customer_id. Primary key for star schema joins."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "The natural operational business key linking to the customer."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: person_type
+        description: "Identifies if the customer is a natural person (PF) or legal entity (PJ)."
+
+      - name: legal_name
+        description: "The official legal name of the customer."
+
+      - name: trade_name
+        description: "The commercial or brand name of the customer."
+
+      - name: tax_id
+        description: "The official tax identification number (CPF or CNPJ)."
+
+      - name: tax_id_type
+        description: "Classification of the tax identifier (e.g., 'CPF', 'CNPJ', 'INVALID_TAX_ID')."
+
+      - name: state_registration
+        description: "The state tax registration number (Inscrição Estadual), if applicable."
+
+      - name: state_tax_status
+        description: "Tax status under state regulations (e.g., 'Contributor', 'Exempt', 'Non-Contributor')."
+
+      - name: customer_email
+        description: "The primary contact email of the customer."
+
+      - name: customer_phone
+        description: "The primary contact phone number of the customer."
+
+      - name: is_active
+        description: "Boolean flag indicating if the customer account is currently active."
+
+      - name: primary_postal_code
+        description: "The postal code (CEP) of the customer's primary address."
+
+      - name: primary_street
+        description: "The street name of the customer's primary address."
+
+      - name: primary_street_number
+        description: "The exterior number of the customer's primary address."
+
+      - name: primary_district
+        description: "The neighborhood or district of the customer's primary address."
+
+      - name: primary_city
+        description: "The city name of the customer's primary address."
+
+      - name: primary_state
+        description: "The state abbreviation (UF) of the customer's primary address."
+
+      - name: primary_country
+        description: "The country of the customer's primary address."
+
+      - name: ingestion_timestamp
+        description: "The most recent execution timestamp across all source systems involved."
+        data_tests:
+          - not_null
