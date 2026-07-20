@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: int_product_variants_core
-    description: "Core intermediate model that consolidates core master data for product variants, joining variants, products, brands, and categories."
+    description: "Core intermediate model that consolidates master data for product variants, joining variants, products, brands, categories (with self-join for hierarchy), and preferred suppliers."
     columns:
       - name: product_variant_id
         description: "Primary key identifying the unique product variant (SKU)."
@@ -28,7 +28,7 @@ models:
         description: "The operational leaf category name assigned to the product."
 
       - name: parent_category_name
-        description: "The top-level or macro category name for hierarchical grouping."
+        description: "The top-level or macro category name resolved via self-join."
 
       - name: sku
         description: "Stock Keeping Unit unique alphanumeric identifier."
@@ -47,6 +47,12 @@ models:
 
       - name: is_active
         description: "Boolean flag indicating if the product variant is currently active in the catalog."
+
+      - name: preferred_supplier_id
+        description: "The internal ID of the primary/preferred supplier for this variant."
+
+      - name: preferred_supplier_lead_time
+        description: "The expected delivery lead time in days for the preferred supplier."
 
       - name: ingestion_timestamp
         description: "The baseline execution timestamp fetched from the bronze layer for auditing."

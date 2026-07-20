@@ -6,11 +6,9 @@ pivoted_attributes as (
     select * from {{ ref('int_variant_attributes_pivoted') }}
 ),
 
-final_joined as (
+prepared_data as (
     select
-        -- Chave substituta para o Star Schema
-        md5(cast(cor.product_variant_id as string)) as variant_sk
-        , cor.product_variant_id
+        cor.product_variant_id
         , cor.product_id
         , cor.product_name
         , cor.variant_name
@@ -21,11 +19,12 @@ final_joined as (
         , cor.barcode_ean
         , cor.sale_price
         , cor.cost_price
-        -- Renomeado levemente para não confundir com o weight dos atributos
         , cor.weight_kg as standard_weight_kg
         , cor.is_active
-        
-        -- Atributos técnicos vindos do pivot
+        -- Campos novos do fornecedor preferencial trazidos da core
+        , cor.preferred_supplier_id
+        , cor.preferred_supplier_lead_time
+        -- Atributos técnicos pivotados
         , att.product_color
         , att.product_size
         , att.length_m
@@ -35,14 +34,43 @@ final_joined as (
         , att.is_waterproof
         , att.product_material
         
-        -- Timestamp de auditoria seguro (se não tiver atributo, usa só o da core)
-        , greatest(
-            cor.ingestion_timestamp, 
-            coalesce(att.ingestion_timestamp, cor.ingestion_timestamp)
-        ) as ingestion_timestamp
+        -- 2. Cálculos, funções e transformações ficam por último na CTE
+        , md5(cast(cor.product_variant_id as string)) as variant_sk
+        , case
+            when att.ingestion_timestamp > cor.ingestion_timestamp
+                then att.ingestion_timestamp
+            else cor.ingestion_timestamp
+        end as ingestion_timestamp
     from core_variants as cor
     left join pivoted_attributes as att 
         on cor.product_variant_id = att.product_variant_id
 )
 
-select * from final_joined
+-- 3. No SELECT final organizamos a casa colocando as chaves no topo para o BI
+select
+    variant_sk
+    , product_variant_id
+    , product_id
+    , product_name
+    , variant_name
+    , brand_name
+    , category_name
+    , parent_category_name
+    , sku
+    , barcode_ean
+    , sale_price
+    , cost_price
+    , standard_weight_kg
+    , is_active
+    , preferred_supplier_id
+    , preferred_supplier_lead_time
+    , product_color
+    , product_size
+    , length_m
+    , power_hp
+    , voltage_v
+    , attribute_weight_kg
+    , is_waterproof
+    , product_material
+    , ingestion_timestamp
+from prepared_data

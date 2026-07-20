@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: dim_product_variants
-    description: "Gold dimension model for product variants. Combines master data (brand, category, pricing) with technical specifications from the pivoted EAV tables."
+    description: "Gold dimension model for product variants. Combines master data, technical attributes from the pivoted EAV tables, and purchasing parameters from preferred suppliers."
     columns:
       - name: variant_sk
         description: "Surrogate key generated via MD5 hash of the product_variant_id. Primary key for star schema joins."
@@ -52,6 +52,12 @@ models:
       - name: is_active
         description: "Boolean flag indicating if the variant is currently active."
 
+      - name: preferred_supplier_id
+        description: "The internal business key of the primary/preferred supplier for this product variant."
+
+      - name: preferred_supplier_lead_time
+        description: "The standard delivery lead time in days guaranteed by the preferred supplier. Crucial for Reorder Point metrics."
+
       - name: product_color
         description: "Technical attribute: Color specification."
 
@@ -80,3 +86,4 @@ models:
         description: "The most recent execution timestamp across all source systems involved."
         data_tests:
           - not_null
+          
