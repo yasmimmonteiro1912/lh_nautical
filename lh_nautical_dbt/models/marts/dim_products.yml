@@ -1,0 +1,89 @@
+version: 2
+
+models:
+  - name: dim_product_variants
+    description: "Gold dimension model for product variants. Combines master data, technical attributes from the pivoted EAV tables, and purchasing parameters from preferred suppliers."
+    columns:
+      - name: variant_sk
+        description: "Surrogate key generated via MD5 hash of the product_variant_id. Primary key for star schema joins."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_variant_id
+        description: "The natural operational business key for the product variant (SKU granularity)."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_id
+        description: "Foreign key identifying the master product."
+
+      - name: product_name
+        description: "The commercial name of the master product."
+
+      - name: variant_name
+        description: "The specific descriptive name identifying the variant."
+
+      - name: brand_name
+        description: "The manufacturer or brand name."
+
+      - name: category_name
+        description: "The operational leaf category name."
+
+      - name: parent_category_name
+        description: "The top-level or macro category name."
+
+      - name: sku
+        description: "Stock Keeping Unit unique alphanumeric identifier."
+
+      - name: barcode_ean
+        description: "The standard barcode string (EAN)."
+
+      - name: sale_price
+        description: "The current standard commercial selling price."
+
+      - name: cost_price
+        description: "The original wholesale or manufacturing cost price."
+
+      - name: standard_weight_kg
+        description: "The registered physical weight of the product variant in kilograms."
+
+      - name: is_active
+        description: "Boolean flag indicating if the variant is currently active."
+
+      - name: preferred_supplier_id
+        description: "The internal business key of the primary/preferred supplier for this product variant."
+
+      - name: preferred_supplier_lead_time
+        description: "The standard delivery lead time in days guaranteed by the preferred supplier. Crucial for Reorder Point metrics."
+
+      - name: product_color
+        description: "Technical attribute: Color specification."
+
+      - name: product_size
+        description: "Technical attribute: Size or dimensions label."
+
+      - name: length_m
+        description: "Technical attribute: Length measured in meters."
+
+      - name: power_hp
+        description: "Technical attribute: Propulsion capacity measured in Horsepower."
+
+      - name: voltage_v
+        description: "Technical attribute: Electrical operating voltage."
+
+      - name: attribute_weight_kg
+        description: "Technical attribute: Physical weight recorded in the specs catalog."
+
+      - name: is_waterproof
+        description: "Technical attribute: Waterproof certification flag."
+
+      - name: product_material
+        description: "Technical attribute: Raw material composition."
+
+      - name: ingestion_timestamp
+        description: "The most recent execution timestamp across all source systems involved."
+        data_tests:
+          - not_null
+          

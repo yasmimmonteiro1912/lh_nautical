@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: int_product_variants_core
+    description: "Core intermediate model that consolidates master data for product variants, joining variants, products, brands, categories (with self-join for hierarchy), and preferred suppliers."
+    columns:
+      - name: product_variant_id
+        description: "Primary key identifying the unique product variant (SKU)."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_id
+        description: "Foreign key identifying the master product associated with this variant."
+        data_tests:
+          - not_null
+
+      - name: product_name
+        description: "The commercial name of the master product."
+
+      - name: variant_name
+        description: "The specific descriptive name or SKU code identifying the variant."
+
+      - name: brand_name
+        description: "The manufacturer or brand name of the product."
+
+      - name: category_name
+        description: "The operational leaf category name assigned to the product."
+
+      - name: parent_category_name
+        description: "The top-level or macro category name resolved via self-join."
+
+      - name: sku
+        description: "Stock Keeping Unit unique alphanumeric identifier."
+
+      - name: barcode_ean
+        description: "The European Article Number (EAN) or standard barcode string."
+
+      - name: sale_price
+        description: "The current standard commercial selling price of the variant."
+
+      - name: cost_price
+        description: "The original wholesale or manufacturing cost price of the variant."
+
+      - name: weight_kg
+        description: "The registered physical weight of the product variant in kilograms."
+
+      - name: is_active
+        description: "Boolean flag indicating if the product variant is currently active in the catalog."
+
+      - name: preferred_supplier_id
+        description: "The internal ID of the primary/preferred supplier for this variant."
+
+      - name: preferred_supplier_lead_time
+        description: "The expected delivery lead time in days for the preferred supplier."
+
+      - name: ingestion_timestamp
+        description: "The baseline execution timestamp fetched from the bronze layer for auditing."
+        data_tests:
+          - not_null

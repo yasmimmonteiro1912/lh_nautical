@@ -1,0 +1,89 @@
+version: 2
+
+models:
+  - name: dim_dates
+    description: "Tabela dimensional de datas (calendário) gerada automaticamente via pacote dbt_date. Utilizada para suporte a análises temporais no projeto."
+    columns:
+      - name: date_sk
+        description: "Chave substituta (Surrogate Key) inteligente no formato inteiro YYYYMMDD."
+        data_tests:
+          - unique
+          - not_null
+      
+      - name: full_date
+        description: "Data completa no formato nativo DATE (YYYY-MM-DD)."
+        data_tests:
+          - unique
+          - not_null
+          
+      - name: previous_date
+        description: "Data correspondente ao dia anterior."
+        
+      - name: next_date
+        description: "Data correspondente ao dia seguinte."
+        
+      - name: previous_year_date
+        description: "Data exata correspondente ao mesmo dia no ano anterior."
+        
+      - name: previous_year_over_year_date
+        description: "Data do ano anterior ajustada para comparações de Year-over-Year (YoY)."
+
+      - name: day
+        description: "Número do dia do mês (1 a 31)."
+        
+      - name: day_of_week
+        description: "Número do dia da semana."
+        
+      - name: day_of_week_iso
+        description: "Número do dia da semana no padrão ISO."
+
+      - name: day_name
+        description: "Nome completo do dia da semana."
+        
+      - name: day_name_short
+        description: "Nome abreviado do dia da semana."
+
+      - name: day_of_year
+        description: "Número do dia dentro do ano (1 a 365/366)."
+
+      - name: week_start_date
+        description: "Data do primeiro dia da semana correspondente."
+        
+      - name: week_end_date
+        description: "Data do último dia da semana correspondente."
+
+      - name: previous_year_week_start_date
+        description: "Data de início da mesma semana no ano anterior."
+
+      - name: previous_year_week_end_date
+        description: "Data de término da mesma semana no ano anterior."
+
+      - name: week_of_year
+        description: "Número da semana no ano."
+
+      - name: iso_week_start_date
+        description: "Data de início da semana no padrão ISO."
+
+      - name: iso_week_end_date
+        description: "Data de término da semana no padrão ISO."
+
+      - name: previous_year_iso_week_start_date
+        description: "Data de início da semana ISO no ano anterior."
+
+      - name: previous_year_iso_week_end_date
+        description: "Data de término da semana ISO no ano anterior."
+
+      - name: month
+        description: "Número do mês do ano (1 a 12)."
+
+      - name: year
+        description: "Ano com 4 dígitos (ex: 2026)."
+
+      - name: quarter
+        description: "Trimestre do ano (1 a 4)."
+
+      - name: is_weekend
+        description: "Flag indicando se o dia é final de semana (Yes ou No)."
+        data_tests:
+          - accepted_values:
+              values: ['Yes', 'No']

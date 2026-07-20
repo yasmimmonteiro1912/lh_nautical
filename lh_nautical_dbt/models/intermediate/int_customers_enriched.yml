@@ -1,0 +1,73 @@
+version: 2
+
+models:
+  - name: int_customers_enriched
+    description: "Intermediate model that combines customer tax profiles and classifications with their primary address details."
+    columns:
+      - name: customer_id
+        description: "Primary key linking to the customer."
+        tests:
+          - unique
+          - not_null
+
+      - name: person_type
+        description: "Identifies if the customer is a natural person (PF) or legal entity (PJ)."
+
+      - name: legal_name
+        description: "The official legal name of the customer."
+
+      - name: trade_name
+        description: "The commercial or brand name of the customer."
+
+      - name: tax_id
+        description: "The official tax identification number (CPF or CNPJ)."
+
+      - name: tax_id_type
+        description: "Classification of the tax identifier. Expected values: 'CPF' or 'CNPJ'."
+        tests:
+          - accepted_values:
+              values: ['CPF', 'CNPJ', 'INVALID_TAX_ID']
+
+      - name: state_registration
+        description: "The state tax registration number (Inscrição Estadual), if applicable."
+
+      - name: state_tax_status
+        description: "Tax status under state regulations. Expected values: 'Contributor', 'Exempt', or 'Non-Contributor'."
+        tests:
+          - accepted_values:
+              values: ['Contributor', 'Exempt', 'Non-Contributor']
+
+      - name: customer_email
+        description: "The primary contact email of the customer."
+
+      - name: customer_phone
+        description: "The primary contact phone number of the customer."
+
+      - name: is_active
+        description: "Boolean flag indicating if the customer account is currently active."
+
+      - name: primary_postal_code
+        description: "The postal code (CEP) of the customer's primary address."
+
+      - name: primary_street
+        description: "The street name of the customer's primary address."
+
+      - name: primary_street_number
+        description: "The exterior number of the customer's primary address."
+
+      - name: primary_district
+        description: "The neighborhood or district of the customer's primary address."
+
+      - name: primary_city
+        description: "The city name of the customer's primary address."
+
+      - name: primary_state
+        description: "The state abbreviation (UF) of the customer's primary address."
+
+      - name: primary_country
+        description: "The country of the customer's primary address."
+
+      - name: ingestion_timestamp
+        description: "The most recent audit timestamp between the customer and address records."
+        tests:
+          - not_null
