@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: dim_movement_type
+    description: "Junk dimension model that categorizes inventory transaction types and their source reference tables."
+    columns:
+      - name: movement_type_sk
+        description: "Surrogate key generated via MD5 hash of movement_type and reference_table."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: movement_type
+        description: "The raw transactional code for the movement (e.g., sale_out, purchase_in)."
+        data_tests:
+          - not_null
+
+      - name: reference_table
+        description: "The operational source table associated with the movement."
+
+      - name: movement_category
+        description: "Human-readable business category (e.g., Venda, Devolução, Recebimento)."
+        data_tests:
+          - not_null
