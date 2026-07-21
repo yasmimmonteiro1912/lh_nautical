@@ -1,0 +1,6 @@
+movement_type,reference_table,movement_category
+sale_out,orders,Venda
+purchase_in,manual,Saldo Inicial/Ajuste
+purchase_in,goods_receipts,Recebimento de Compras
+return_in,returns,Devolução de Cliente
+return_out,returns,Devolução ao Fornecedor
