@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: fct_inventory_movements
+    description: "Tabela Fato de movimentações e auditoria física de estoque em lojas e galpões."
+    columns:
+      - name: movement_sk
+        description: "Chave primária substituta (Surrogate Key) da movimentação."
+        tests:
+          - unique
+          - not_null
+
+      - name: date_sk
+        description: "Chave estrangeira apontando para dim_date (Formato YYYYMMDD)."
+        tests:
+          - not_null
+
+      - name: variant_sk
+        description: "Chave estrangeira apontando para a variante do produto (dim_product_variant)."
+        tests:
+          - not_null
+
+      - name: location_sk
+        description: "Chave estrangeira apontando para o local/filial (dim_location)."
+        tests:
+          - not_null
+
+      - name: movement_type_sk
+        description: "Chave estrangeira apontando para a dim_movement_type."
+        tests:
+          - not_null
+
+      - name: employee_sk
+        description: "Chave estrangeira apontando para o colaborador responsável (dim_employee). Pode ser nula em rotinas automáticas de sistema."
+
+      - name: reference_id
+        description: "ID da tabela transacional de origem que motivou a movimentação."
+
+      - name: quantity
+        description: "Métrica de fluxo de estoque (Positivo para entradas, Negativo para saídas)."
+        tests:
+          - not_null
+
+      - name: notes
+        description: "Notas e justificativas operacionais padronizadas na camada de Staging."
