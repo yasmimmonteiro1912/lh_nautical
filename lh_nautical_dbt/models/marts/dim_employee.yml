@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: dim_employee
+    description: "Dimensão Colaborador contendo o perfil de RH, cargo e contexto operacional/geográfico da filial de trabalho. Preparada para Role-Playing em Vendas, Estoque e Compras."
+    columns:
+      - name: employee_key
+        description: "Chave primária substituta (Surrogate Key - Hash MD5) do colaborador."
+        tests:
+          - unique
+          - not_null
+
+      - name: employee_id
+        description: "Chave primária natural do colaborador oriunda do sistema transacional."
+        tests:
+          - unique
+          - not_null
+
+      - name: full_name
+        description: "Nome completo do colaborador."
+        tests:
+          - not_null
+
+      - name: cpf
+        description: "CPF do colaborador para fins de auditoria e compliance."
+        tests:
+          - not_null
+
+      - name: email
+        description: "E-mail corporativo utilizado para mapeamento e controle de acessos (RLS)."
+
+      - name: role
+        description: "Cargo operacional do colaborador (salesperson, stockist, buyer, manager, admin)."
+        tests:
+          - not_null
+
+      - name: hire_date
+        description: "Data formal de contratação do funcionário."
+        tests:
+          - not_null
+
+      - name: termination_date
+        description: "Data de desligamento do colaborador (preenchida apenas em colaboradores inativos)."
+
+      - name: employee_is_active
+        description: "Flag booleana indicando se o colaborador está ativo na folha de pagamento (calculada com base na data de demissão)."
+        tests:
+          - not_null
+
+      - name: primary_location_name
+        description: "Nome descritivo da filial/unidade de trabalho do colaborador."
+
+      - name: primary_location_type
+        description: "Tipo de estabelecimento da filial (ex: store, warehouse)."
+
+      - name: primary_location_city
+        description: "Cidade da filial principal."
+
+      - name: primary_location_state
+        description: "Unidade Federativa / Estado (sigla) da filial principal."
+
+      - name: primary_location_postal_code
+        description: "Código postal / CEP da filial principal."
+
+      - name: ingestion_timestamp
+        description: "Data/hora mais recente de ingestão dos dados de origem para auditoria."
+        tests:
+          - not_null
