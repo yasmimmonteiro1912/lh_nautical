@@ -21,7 +21,7 @@ models:
           - not_null
 
       - name: supplier_sku
-        description: "Sanitized supplier SKU code. Placeholders ('?', 'sem-codigo', 'tbd') and empty strings are cast to NULL; valid codes are normalized to UPPERCASE.
+        description: "Sanitized supplier SKU code. Placeholders ('?', 'sem-codigo', 'tbd') and empty strings are cast to NULL; valid codes are normalized to UPPERCASE."
 
       - name: last_quoted_cost
         description: "Último custo cotado ou cobrado por esse fornecedor."
