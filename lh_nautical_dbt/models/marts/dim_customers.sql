@@ -2,9 +2,9 @@ with enriched_customers as (
     select * from {{ ref('int_customers_enriched') }}
 ),
 
-final_dimension as (
+calculated_fields as (
     select
-        -- Chave substituta (Surrogate Key) para os joins do Star Schema
+        -- 1. Colunas simples/diretas primeiro (Atende a regra ST06 do SQLFluff)
         cst.customer_id
         , cst.person_type
         , cst.legal_name
@@ -17,8 +17,6 @@ final_dimension as (
         , cst.customer_phone
         , cst.is_active
         , cst.primary_postal_code
-        
-        -- Endereço desnormalizado pronto para os relatórios
         , cst.primary_street
         , cst.primary_street_number
         , cst.primary_district
@@ -26,10 +24,33 @@ final_dimension as (
         , cst.primary_state
         , cst.primary_country
         , cst.ingestion_timestamp
-        
-        -- Timestamp de auditoria
-        , md5(cast(cst.customer_id as string)) as customer_sk
+
+        -- 2. Geração da SK via macro dbt_utils
+        , {{ dbt_utils.generate_surrogate_key(['cst.customer_id']) }}
+            as customer_sk
     from enriched_customers as cst
 )
 
-select * from final_dimension
+-- 3. SELECT final organizando a chave SK no topo para o Star Schema
+select
+    customer_sk
+    , customer_id
+    , person_type
+    , legal_name
+    , trade_name
+    , tax_id
+    , tax_id_type
+    , state_registration
+    , state_tax_status
+    , customer_email
+    , customer_phone
+    , is_active
+    , primary_postal_code
+    , primary_street
+    , primary_street_number
+    , primary_district
+    , primary_city
+    , primary_state
+    , primary_country
+    , ingestion_timestamp
+from calculated_fields
