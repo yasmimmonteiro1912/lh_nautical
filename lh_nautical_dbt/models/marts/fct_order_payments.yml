@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: fct_order_payments
+    description: "Tabela fato de pagamentos mantendo todas as chaves como STRING para evitar erros de cast no Databricks."
+    columns:
+      - name: payment_sk
+        description: "Chave primaria do pagamento (STRING id de origem)."
+        tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        description: "Chave estrangeira do pedido (STRING)."
+        tests:
+          - not_null
+
+      - name: customer_id
+        description: "Chave estrangeira do cliente (STRING). Retorna 'UNKNOWN' caso o cliente nao seja encontrado."
+        tests:
+          - not_null
+
+      - name: date_sk
+        description: "Chave de data formatada como texto no padrao yyyyMMdd (STRING)."
+        tests:
+          - not_null
+
+      - name: payment_method
+        description: "Metodo de pagamento em minusculas e sem espacos sobressalentes."
+
+      - name: payment_amount
+        description: "Valor total pago no evento (Decimal 14,2)."
+        tests:
+          - not_null
+          
