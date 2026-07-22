@@ -14,25 +14,29 @@ with goods_receipts as (
 , receipts_enriched as (
     select
         -- Header identification & metadata pass-through
-          goods_receipts.goods_receipt_id
+        goods_receipts.goods_receipt_id
         , goods_receipts.purchase_order_id
         , goods_receipts.received_by_employee_id
         , goods_receipts.received_at
-        , goods_receipts.notes-b 
-
-        -- Transformation 1: Count of distinct item lines attached to the receipt
-        , count(goods_receipt_items.goods_receipt_item_id) as total_items
-
-        -- Transformation 2: Null-safe total units/volume received matching staging precision (decimal 14,3)
         , cast(
             coalesce(sum(goods_receipt_items.quantity_received), 0) 
-          as decimal(14, 3)) as total_quantity_received
+            as decimal(14, 3)
+        ) as total_quantity_received 
+
+        -- Transformation 1: Count of distinct item lines attached to receipt
+        , goods_receipts.notes
+
+        -- Transformation 2: Null-safe total units/volume received 
+        -- matching staging precision (decimal 14,3)
+        , count(goods_receipt_items.goods_receipt_item_id) as total_items
           
     from goods_receipts
     left join goods_receipt_items
-        on goods_receipts.goods_receipt_id = goods_receipt_items.goods_receipt_id
+        on
+            goods_receipts.goods_receipt_id
+            = goods_receipt_items.goods_receipt_id
     group by
-          goods_receipts.goods_receipt_id
+        goods_receipts.goods_receipt_id
         , goods_receipts.purchase_order_id
         , goods_receipts.received_by_employee_id
         , goods_receipts.received_at
