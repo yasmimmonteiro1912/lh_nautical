@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: fct_inventory_snapshot_daily
+    description: "Tabela Fato de Snapshot Periódico que armazena a posição e valor de estoque diário por filial e variante."
+    columns:
+      - name: snapshot_sk
+        description: "Chave primária substituta da foto diária (composta por data, local e variante)."
+        tests:
+          - unique
+          - not_null
+
+      - name: date_sk
+        description: "Chave estrangeira da data do snapshot apontando para dim_date (YYYYMMDD)."
+        tests:
+          - not_null
+
+      - name: variant_sk
+        description: "Chave estrangeira apontando para dim_product_variant."
+        tests:
+          - not_null
+
+      - name: location_sk
+        description: "Chave estrangeira apontando para dim_location."
+        tests:
+          - not_null
+
+      - name: quantity_on_hand
+        description: "Quantidade física disponível no estoque na data do snapshot."
+        tests:
+          - not_null
+
+      - name: stock_value_estimated
+        description: "Valor monetário estimado do estoque (Quantidade * Custo Unitário)."
