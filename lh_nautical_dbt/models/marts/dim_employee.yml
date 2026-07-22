@@ -2,11 +2,11 @@ version: 2
 
 models:
   - name: dim_employee
-    description: "Dimensão Colaborador contendo o perfil de RH, cargo e contexto operacional/geográfico da filial de trabalho. Preparada para Role-Playing em Vendas, Estoque e Compras."
+    description: "Dimensão Colaborador contendo o perfil de RH, cargo e contexto operacional/geográfico da filial de trabalho."
     columns:
       - name: employee_sk
         description: "Primary surrogate key generated via dbt_utils hash of employee_id."
-        data_tests:
+        tests:
           - unique
           - not_null
 
@@ -16,20 +16,20 @@ models:
           - unique
           - not_null
 
-      - name: full_name
+      - name: employee_full_name
         description: "Nome completo do colaborador."
         tests:
           - not_null
 
-      - name: cpf
+      - name: employee_cpf
         description: "CPF do colaborador para fins de auditoria e compliance."
         tests:
           - not_null
 
-      - name: email
+      - name: employee_email
         description: "E-mail corporativo utilizado para mapeamento e controle de acessos (RLS)."
 
-      - name: role
+      - name: employee_role
         description: "Cargo operacional do colaborador (salesperson, stockist, buyer, manager, admin)."
         tests:
           - not_null
@@ -42,8 +42,8 @@ models:
       - name: termination_date
         description: "Data de desligamento do colaborador (preenchida apenas em colaboradores inativos)."
 
-      - name: employee_is_active
-        description: "Flag booleana indicando se o colaborador está ativo na folha de pagamento (calculada com base na data de demissão)."
+      - name: is_active
+        description: "Flag booleana indicando se o colaborador está ativo na folha de pagamento."
         tests:
           - not_null
 

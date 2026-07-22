@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: agg_inventory_monthly_health
+    description: "Tabela agregada mensal da camada Gold para monitoramento da saúde do estoque, valor imobilizado e giro por filial e variante de produto."
+    columns:
+      - name: inventory_health_sk
+        description: "Chave primária substituta gerada pela combinação de AnoMês + Filial + Variante."
+        tests:
+          - unique
+          - not_null
+
+      - name: year_month_key
+        description: "Mês de referência no formato numérico YYYYMM (ex: 202607)."
+        tests:
+          - not_null
+
+      - name: variant_sk
+        description: "Chave estrangeira substituta para ligação com a dimensão de produtos/variantes."
+        tests:
+          - not_null
+
+      - name: product_variant_id
+        description: "Identificador natural da variante do produto oriundo do sistema de origem (chave de apoio para auditoria)."
+
+      - name: location_sk
+        description: "Chave estrangeira substituta para ligação com a dimensão de locais/filiais."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_sk
+
+      - name: location_id
+        description: "Identificador natural da filial/localização oriundo do sistema de origem (chave de apoio para auditoria)."
+
+      - name: avg_quantity_on_hand
+        description: "Média diária da quantidade física de itens mantidos em estoque durante o mês."
+
+      - name: avg_stock_value_estimated
+        description: "Média diária do valor financeiro total estimado do estoque no mês (Quantidade x Preço de Custo)."
+
+      - name: total_entries_quantity
+        description: "Quantidade total de itens recebidos no mês (soma das movimentações do tipo 'IN')."
+
+      - name: total_exits_quantity
+        description: "Quantidade total de itens que saíram/foram vendidos no mês (soma das movimentações do tipo 'OUT')."
+
+      - name: ingestion_timestamp
+        description: "Data e hora da execução/processamento da tabela para fins de auditoria de carga."
