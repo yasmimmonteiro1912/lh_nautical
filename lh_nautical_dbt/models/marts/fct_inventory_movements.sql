@@ -1,6 +1,6 @@
 -- =====================================================================
 -- Model: fct_inventory_movements
--- Description: Fact table recording physical stock fluctuations 
+-- Description: Fact table recording physical stock fluctuations
 --              (entries, exits, adjustments) in warehouses and stores.
 -- =====================================================================
 
@@ -10,51 +10,58 @@ with stg_movements as (
 
 transformed_movements as (
     select
-        -- 1. Chave Primária da Fato (Surrogate Key)
-        md5(cast(mov.stock_movement_id as string)) as movement_sk
-        
-        -- 2. Chaves Estrangeiras (FKs)
-        -- Converte o timestamp occurred_at para inteiro AAAAMMDD (Ex: 20260721)
+        mov.stock_movement_id
+        , mov.product_variant_id
+        , mov.location_id
+        , mov.employee_id
+        , mov.reference_id
+        , mov.movement_notes as notes
+        , mov.ingestion_timestamp
+
         , cast(date_format(mov.occurred_at, 'yyyyMMdd') as int) as date_sk
-        , md5(cast(mov.product_variant_id as string)) as variant_sk
-        , md5(cast(mov.location_id as string)) as location_sk
-        
-        -- Chave composta conectando com a dim_movement_type da Yasmim
+
+        -- 3. Surrogate Keys padronizadas via dbt_utils
+        , {{ dbt_utils.generate_surrogate_key(['mov.stock_movement_id']) }}
+            as movement_sk
+        , {{ dbt_utils.generate_surrogate_key(['mov.product_variant_id']) }}
+            as variant_sk
+        , {{ dbt_utils.generate_surrogate_key(['mov.location_id']) }}
+            as location_sk
+
+        -- Chave composta do Tipo de Movimentacao
         , {{ dbt_utils.generate_surrogate_key([
             'mov.movement_type',
             'mov.reference_table'
         ]) }} as movement_type_sk
-        
-        -- FK do funcionário (trata nulo caso seja uma movimentação automática de sistema)
+
+        -- SK do Colaborador (Trata nulos para movimentacoes do sistema)
         , case
             when mov.employee_id is not null
-                then md5(cast(mov.employee_id as string))
+                then {{ dbt_utils.generate_surrogate_key(['mov.employee_id']) }}
         end as employee_sk
-        
-        -- 3. Atributos Degenerados
-        , mov.reference_id
-        -- Pegando a coluna higienizada da staging (movement_notes) e entregando como notes
-        , mov.movement_notes as notes
-        
-        -- 4. Métrica de Fluxo de Estoque
-        -- Regra: Como a staging entrega 'out' em minúsculas, invertemos o sinal para negativo
+
         , case
             when lower(trim(mov.movement_type)) like '%out%'
                 then -1 * abs(mov.quantity)
             else abs(mov.quantity)
-          end as quantity
+        end as quantity
 
     from stg_movements as mov
 )
 
 select
     movement_sk
+    , stock_movement_id
     , date_sk
     , variant_sk
+    , product_variant_id
     , location_sk
+    , location_id
     , movement_type_sk
     , employee_sk
+    , employee_id
     , reference_id
     , quantity
     , notes
+    , ingestion_timestamp
 from transformed_movements

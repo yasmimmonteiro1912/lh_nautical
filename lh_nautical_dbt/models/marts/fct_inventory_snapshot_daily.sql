@@ -13,22 +13,27 @@ with stock_levels as (
 ),
 
 product_variants as (
-    select * from {{ ref('stg_lh_nautical_product_variants') }}
+    -- [MELHORIA 1]: Puxando da Intermediate int_product_variants_core
+    select * from {{ ref('int_product_variants_core') }}
 ),
 
 calculated_snapshot as (
     select
-        -- 1. Colunas simples primeiro (Atende a regra ST06 do SQLFluff)
-        sl.quantity_on_hand
+        sl.product_variant_id
+        , sl.location_id
+        , sl.quantity_on_hand
+        , sl.ingestion_timestamp
 
-        -- 2. Colunas calculadas / expressoes
         , cast(date_format(current_date(), 'yyyyMMdd') as int) as date_sk
         , cast(
             sl.quantity_on_hand * coalesce(pv.cost_price, 0)
             as decimal(18, 2)
         ) as stock_value_estimated
-        , md5(cast(sl.product_variant_id as string)) as variant_sk
-        , md5(cast(sl.location_id as string)) as location_sk
+
+        , {{ dbt_utils.generate_surrogate_key(['sl.product_variant_id']) }}
+            as variant_sk
+        , {{ dbt_utils.generate_surrogate_key(['sl.location_id']) }}
+            as location_sk
     from stock_levels as sl
     left join product_variants as pv
         on sl.product_variant_id = pv.product_variant_id
@@ -36,28 +41,32 @@ calculated_snapshot as (
 
 final_snapshot as (
     select
-        -- 1. Colunas simples primeiro
-        date_sk
+        -- Colunas simples primeiro
+        product_variant_id
+        , location_id
+        , date_sk
         , variant_sk
         , location_sk
         , quantity_on_hand
         , stock_value_estimated
+        , ingestion_timestamp
 
-        -- 2. Macro / Calculo por ultimo
         , {{ dbt_utils.generate_surrogate_key([
             'date_sk',
-            'location_sk',
-            'variant_sk'
+            'location_id',
+            'product_variant_id'
         ]) }} as snapshot_sk
     from calculated_snapshot
 )
 
--- SELECT final padronizado na ordem da Fato (Star Schema)
 select
     snapshot_sk
     , date_sk
     , variant_sk
+    , product_variant_id
     , location_sk
+    , location_id
     , quantity_on_hand
     , stock_value_estimated
+    , ingestion_timestamp
 from final_snapshot
