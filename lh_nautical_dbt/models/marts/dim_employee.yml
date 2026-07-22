@@ -4,9 +4,9 @@ models:
   - name: dim_employee
     description: "Dimensão Colaborador contendo o perfil de RH, cargo e contexto operacional/geográfico da filial de trabalho. Preparada para Role-Playing em Vendas, Estoque e Compras."
     columns:
-      - name: employee_key
-        description: "Chave primária substituta (Surrogate Key - Hash MD5) do colaborador."
-        tests:
+      - name: employee_sk
+        description: "Primary surrogate key generated via dbt_utils hash of employee_id."
+        data_tests:
           - unique
           - not_null
 

@@ -1,0 +1,73 @@
+version: 2
+
+models:
+  - name: fct_sales_items
+    description: "Core sales fact model at the line-item granularity, connecting transactional sales data to dimensional surrogate keys, calculated revenue metrics, and active fiscal invoice information."
+    columns:
+      - name: sales_item_sk
+        description: "Primary surrogate key for the sales line item, generated via dbt_utils hash of order_item_id."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: date_sk
+        description: "Foreign surrogate key mapping the order date (placed_at) to dim_dates."
+        data_tests:
+          - not_null
+
+      - name: customer_sk
+        description: "Foreign surrogate key mapping the order to dim_customers."
+        data_tests:
+          - not_null
+
+      - name: variant_sk
+        description: "Foreign surrogate key mapping the product variant sold to dim_products."
+        data_tests:
+          - not_null
+
+      - name: location_sk
+        description: "Foreign surrogate key mapping the store or warehouse to dim_location."
+
+      - name: employee_sk
+        description: "Foreign surrogate key mapping the salesperson to dim_employee."
+
+      - name: order_id
+        description: "Natural operational order key."
+
+      - name: order_number
+        description: "Human-readable sales order identifier."
+
+      - name: channel
+        description: "Sales channel (e.g., E-commerce, Physical Store, B2B)."
+
+      - name: quantity
+        description: "Quantity of units sold in this line item."
+
+      - name: unit_price
+        description: "Unit selling price of the item."
+
+      - name: discount_amount
+        description: "Monetary value of discount applied to this line item: (gross_revenue - net_revenue)."
+
+      - name: gross_revenue
+        description: "Calculated gross revenue: (quantity * unit_price)."
+
+      - name: net_revenue
+        description: "Net revenue earned on the line item (line_total)."
+
+      - name: nfe_number
+        description: "Number of the associated active fiscal invoice (NFe)."
+
+      - name: nfe_series
+        description: "Series of the associated fiscal invoice."
+
+      - name: invoice_status
+        description: "Current status of the associated fiscal invoice."
+
+      - name: invoice_total_amount
+        description: "Total gross amount of the associated active fiscal invoice."
+
+      - name: ingestion_timestamp
+        description: "Audit timestamp of when the underlying record was ingested."
+        data_tests:
+          - not_null
