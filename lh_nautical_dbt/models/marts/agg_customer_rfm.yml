@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: agg_customer_rfm
+    # Overall model description for automated cataloging (dbt docs)
+    description: "Customer-level RFM mart for lifetime sales behaviors, including recency, frequency, and monetary metrics."
+    
+    columns:
+      - name: customer_sk
+        description: "Surrogate key for the customer in the star schema."
+        # Modern dbt syntax for column assertions
+        data_tests:
+          - unique
+          - not_null
+
+      - name: person_type
+        description: "Customer classification as natural person (PF), legal entity (PJ), or default N/A."
+
+      - name: primary_state
+        description: "Primary customer state abbreviation or N/A when missing."
+
+      - name: last_order_date
+        description: "Most recent order date recorded for the customer."
+
+      - name: reference_date
+        description: "Snapshot date used as baseline for recency calculation (current_date)."
+
+      - name: days_since_last_order
+        description: "Recency (R): Number of days elapsed since the customer's most recent order."
+
+      - name: total_orders
+        description: "Frequency (F): Distinct count of customer orders in the fact table."
+
+      - name: lifetime_value
+        description: "Monetary (M): Total net revenue across all orders for the customer."
+
+      - name: average_ticket
+        description: "Monetary (M): Average net revenue generated per order for the customer."
+        
