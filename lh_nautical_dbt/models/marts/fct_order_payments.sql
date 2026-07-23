@@ -1,55 +1,89 @@
+-- =====================================================================
+-- Model: fct_order_payments
+-- Description: Fact table recording order payments, payment methods,
+--              amounts, and foreign surrogate keys for dimensions.
+-- =====================================================================
+
 with payments as (
+    select * from {{ ref('stg_lh_nautical_payments') }}
+),
 
-    select *
-    from {{ ref('stg_lh_nautical_payments') }}
-
-)
-
-, orders as (
-
-    select *
+orders_summary as (
+    -- Agrupamos para garantir 1 linha por order_id e evitar duplicar pagamentos
+    select
+        order_id
+        , customer_id
+        , is_cancelled
     from {{ ref('int_orders_with_items') }}
+    group by
+        order_id
+        , customer_id
+        , is_cancelled
+),
 
-)
-
-, customers as (
-
-    select *
-    from {{ ref('dim_customers') }}
-
-)
-
-, payment_events as (
-
+joined_payments as (
     select
-        payments.payment_id
-        , payments.order_id
-        , payments.payment_method
-        , payments.payment_amount
-        , payments.paid_at
-        , orders.customer_id
-    from payments
-    left join orders
-        on payments.order_id = orders.order_id
-    where coalesce(orders.is_cancelled, false) = false
+        pym.payment_id
+        , pym.order_id
+        , ord.customer_id
+        , lower(trim(pym.payment_method)) as payment_method
+        , cast(pym.payment_amount as decimal(14, 2)) as payment_amount
+        , pym.paid_at
+        , pym.ingestion_timestamp
+    from payments as pym
+    left join orders_summary as ord
+        on pym.order_id = ord.order_id
+    where coalesce(ord.is_cancelled, false) = false
+),
 
-)
-
-, final_fact as (
-
+calculated_sks as (
     select
-        payment_events.payment_id as payment_sk
-        , payment_events.order_id
-        , coalesce(customers.customer_id, 'UNKNOWN') as customer_id
-        , coalesce(date_format(payment_events.paid_at, 'yyyyMMdd'), 'UNKNOWN') as date_sk
-        , lower(trim(payment_events.payment_method)) as payment_method
-        , cast(payment_events.payment_amount as decimal(14, 2)) as payment_amount
+        -- 1. Colunas puras primeiro (Regra ST06)
+        payment_id
+        , order_id
+        , customer_id
+        , payment_method
+        , payment_amount
+        , paid_at
+        , ingestion_timestamp
 
-    from payment_events
-    left join customers
-        on payment_events.customer_id = customers.customer_id
+        -- 2. Geração das Chaves para o Star Schema
+        , {{ dbt_utils.generate_surrogate_key([
+            'payment_id'
+        ]) }} as payment_sk
 
+        , case
+            when customer_id is not null
+                then {{ dbt_utils.generate_surrogate_key([
+                    'customer_id'
+                ]) }}
+        end as customer_sk
+
+        -- Date SK numérica YYYYMMDD com tratamento para data nula
+        , coalesce(
+            cast(date_format(paid_at, 'yyyyMMdd') as int)
+            , -1
+        ) as date_sk
+    from joined_payments
 )
 
-select *
-from final_fact
+-- 3. SELECT final organizado
+select
+    -- Primary & Foreign Keys
+    payment_sk
+    , date_sk
+    , customer_sk
+
+    -- Natural Keys & Degenerate Dimensions
+    , payment_id
+    , order_id
+    , customer_id
+    , payment_method
+
+    -- Measures
+    , payment_amount
+
+    -- Dates & Metadata
+    , paid_at
+    , ingestion_timestamp
+from calculated_sks

@@ -2,34 +2,50 @@ version: 2
 
 models:
   - name: fct_order_payments
-    description: "Tabela fato de pagamentos mantendo todas as chaves como STRING para evitar erros de cast no Databricks."
+    description: "Tabela fato contendo as transações financeiras de pagamento de pedidos não cancelados."
     columns:
       - name: payment_sk
-        description: "Chave primaria do pagamento (STRING id de origem)."
-        tests:
+        description: "Chave primária substituta (Surrogate Key) do pagamento."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: date_sk
+        description: "Chave estrangeira no formato numérico YYYYMMDD referente à data do pagamento."
+        data_tests:
+          - not_null
+
+      - name: customer_sk
+        description: "Chave estrangeira apontando para a dimensão de clientes (dim_customers)."
+
+      - name: payment_id
+        description: "Chave natural do pagamento no ERP."
+        data_tests:
           - unique
           - not_null
 
       - name: order_id
-        description: "Chave estrangeira do pedido (STRING)."
-        tests:
+        description: "Chave natural do pedido associado ao pagamento."
+        data_tests:
           - not_null
 
       - name: customer_id
-        description: "Chave estrangeira do cliente (STRING). Retorna 'UNKNOWN' caso o cliente nao seja encontrado."
-        tests:
-          - not_null
-
-      - name: date_sk
-        description: "Chave de data formatada como texto no padrao yyyyMMdd (STRING)."
-        tests:
-          - not_null
+        description: "Chave natural do cliente associado ao pedido."
 
       - name: payment_method
-        description: "Metodo de pagamento em minusculas e sem espacos sobressalentes."
+        description: "Método de pagamento utilizado (ex: credit_card, boleto, pix)."
+        data_tests:
+          - not_null
 
       - name: payment_amount
-        description: "Valor total pago no evento (Decimal 14,2)."
-        tests:
+        description: "Valor financeiro transacionado na forma de pagamento."
+        data_tests:
           - not_null
-          
+
+      - name: paid_at
+        description: "Data e hora em que o pagamento foi confirmado."
+
+      - name: ingestion_timestamp
+        description: "Timestamp de auditoria da carga do registro."
+        data_tests:
+          - not_null
