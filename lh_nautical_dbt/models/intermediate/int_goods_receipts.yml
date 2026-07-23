@@ -20,7 +20,11 @@ models:
         description: "Datetime when goods were received."
 
       - name: notes
-        description: "Operational notes or comments regarding the receipt."        
+        description: "Sanitized operational notes regarding the receipt (sem_nota, conferido, necessita_revisao)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sem_nota', 'conferido', 'necessita_revisao']       
 
       - name: total_items
         description: "Count of receipt items."

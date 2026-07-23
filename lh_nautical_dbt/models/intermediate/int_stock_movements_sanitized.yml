@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: int_stock_movements_sanitized
+    description: >
+      Modelo intermediate responsável pela higienização, padronização do vocabulário das observações (movement_notes) 
+      e cálculo das quantidades com sinal matemático (+/ -) e regra de auditoria para zerar movimentações sob suspeita.
+
+    columns:
+      - name: stock_movement_id
+        description: "Chave primária natural da movimentação de estoque."
+        tests:
+          - unique
+          - not_null
+
+      - name: product_variant_id
+        description: "Identificador da variante do produto movimentado."
+        tests:
+          - not_null
+
+      - name: location_id
+        description: "Identificador do local/depósito onde ocorreu a movimentação."
+        tests:
+          - not_null
+
+      - name: employee_id
+        description: "Identificador do funcionário responsável pela movimentação. Pode ser NULO em cargas automáticas do sistema ou saldo inicial."
+
+      - name: reference_id
+        description: "ID do documento de origem associado à movimentação (ex: pedido de venda, ordem de compra). Pode ser NULO."
+
+      - name: reference_table
+        description: "Nome da tabela de origem correspondente ao documento de referência."
+
+      - name: occurred_at
+        description: "Data e hora exata da ocorrência da movimentação de estoque."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Timestamp de auditoria técnica da ingestão da linha."
+        tests:
+          - not_null
+
+      - name: movement_type
+        description: "Tipo de movimentação padronizado em caixa baixa (ex: in, out)."
+        tests:
+          - not_null
+
+      - name: movement_note_status
+        description: "Status higienizado da observação da movimentação."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['sem_nota', 'necessita_revisao', 'saldo_inicial', 'conferido']
+
+      - name: is_pending_review
+        description: "Flag booleana indicando se o registro está aguardando revisão de auditoria."
+        tests:
+          - not_null
+
+      - name: is_audited
+        description: "Flag booleana indicando se a movimentação é um evento auditado ou verificado."
+        tests:
+          - not_null
+
+      - name: signed_quantity
+        description: "Quantidade física bruta movimentada com sinal (+ para entradas, - para saídas), sem aplicar filtros de auditoria."
+        tests:
+          - not_null
+
+      - name: audited_quantity
+        description: "Quantidade física oficial com sinal (+ para entradas, - para saídas). Zera (0) automaticamente caso is_pending_review seja true."
+        tests:
+          - not_null

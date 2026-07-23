@@ -4,6 +4,7 @@ models:
   - name: fct_inventory_movements
     description: "Tabela Fato de movimentações e auditoria física de estoque em lojas e galpões."
     columns:
+      # --- Surrogate Keys (SKs) ---
       - name: movement_sk
         description: "Chave primária substituta (Surrogate Key) da movimentação."
         tests:
@@ -33,13 +34,53 @@ models:
       - name: employee_sk
         description: "Chave estrangeira apontando para o colaborador responsável (dim_employee). Pode ser nula em rotinas automáticas de sistema."
 
-      - name: reference_id
-        description: "ID da tabela transacional de origem que motivou a movimentação."
+      # --- Chaves Naturais / Dimensões Degeneradas ---
+      - name: stock_movement_id
+        description: "ID natural da movimentação vindo da origem (Dimensão Degenerada)."
+        tests:
+          - unique
+          - not_null
 
-      - name: quantity
-        description: "Métrica de fluxo de estoque (Positivo para entradas, Negativo para saídas)."
+      - name: product_variant_id
+        description: "ID natural da variante do produto original do ERP."
+
+      - name: location_id
+        description: "ID natural do local/filial original do ERP."
+
+      - name: employee_id
+        description: "ID natural do colaborador original do ERP. Pode ser nulo."
+
+      - name: reference_id
+        description: "ID da tabela transacional de origem que motivou a movimentação (ex: ID da Nota ou do Pedido)."
+
+      - name: reference_table
+        description: "Nome da tabela de origem que gerou a movimentação (ex: goods_receipts, orders)."
+
+      - name: movement_type
+        description: "Categoria da movimentação no sistema de origem (ex: in, out, adjustment)."
+
+      # --- Regras de Negócio e Auditoria ---
+      - name: notes
+        description: "Notas e justificativas operacionais (Padronizadas na camada Intermediate: sem_nota, saldo_inicial, conferido, necessita_revisao)."
+        
+      - name: is_pending_review
+        description: "Flag indicando se a movimentação é suspeita e precisa de revisão humana."
         tests:
           - not_null
 
-      - name: notes
-        description: "Notas e justificativas operacionais padronizadas na camada de Staging."
+      - name: is_audited
+        description: "Flag indicando se a movimentação é segura (conferida ou carga de sistema)."
+        tests:
+          - not_null
+
+      # --- Métricas (Measures) ---
+      - name: quantity
+        description: "Métrica de fluxo de estoque auditada (+ para entradas, - para saídas). Zera (0) automaticamente se a flag is_pending_review for verdadeira."
+        tests:
+          - not_null
+
+      # --- Metadados ---
+      - name: ingestion_timestamp
+        description: "Data e hora exata em que o registro foi ingerido no Data Lake/Warehouse."
+        tests:
+          - not_null
