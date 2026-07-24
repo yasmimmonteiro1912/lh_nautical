@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: agg_salesperson_monthly_performance
+    description: "Tabela agregada mensal com a performance consolidada por vendedor, cargo e filial para alimentar dashboards de comissões, RH e metas."
+    columns:
+      - name: performance_sk
+        description: "Chave primária substituta da agregação (hash de employee_sk + location_sk + month_start_date)."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: month_start_date
+        description: "Primeiro dia do mês de referência das vendas (ex: 2026-07-01)."
+        data_tests:
+          - not_null
+
+      - name: employee_sk
+        description: "Chave estrangeira apontando para a dimensão de colaboradores (dim_employee)."
+        data_tests:
+          - not_null
+
+      - name: location_sk
+        description: "Chave estrangeira apontando para a dimensão de filiais/lojas (dim_location)."
+        data_tests:
+          - not_null
+
+      - name: employee_id
+        description: "ID natural do vendedor no ERP."
+        data_tests:
+          - not_null
+
+      - name: employee_full_name
+        description: "Nome completo do funcionário."
+
+      - name: employee_role
+        description: "Cargo/Função do vendedor na empresa."
+
+      - name: total_gross_revenue
+        description: "Soma da receita bruta de tabela das vendas realizadas pelo vendedor no mês."
+        data_tests:
+          - not_null
+
+      - name: total_discount_amount
+        description: "Soma do valor monetário de descontos concedidos pelo vendedor."
+        data_tests:
+          - not_null
+
+      - name: total_gross_sales_amount
+        description: "Soma do valor faturado bruto (pós-descontos) do vendedor no mês."
+        data_tests:
+          - not_null
+
+      - name: total_refund_amount
+        description: "Soma do valor reembolsado devido a devoluções de vendas do vendedor."
+        data_tests:
+          - not_null
+
+      - name: total_net_sales_amount
+        description: "Receita líquida real gerada pelo vendedor (total_gross_sales_amount - total_refund_amount)."
+        data_tests:
+          - not_null
+
+      - name: total_orders_count
+        description: "Quantidade total de pedidos únicos atendidos/fechados pelo vendedor no mês."
+        data_tests:
+          - not_null
+
+      - name: total_net_quantity
+        description: "Quantidade total líquida de itens mantidos vendidos pelo vendedor."
+        data_tests:
+          - not_null
+
+      - name: average_ticket_amount
+        description: "Ticket médio de receita líquida por pedido do vendedor no mês (total_net_sales_amount / total_orders_count)."
+
+      - name: aggregated_at
+        description: "Timestamp da execução do cálculo de agregação."
+        data_tests:
+          - not_null
+          
