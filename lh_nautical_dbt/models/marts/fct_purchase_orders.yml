@@ -1,0 +1,115 @@
+version: 2
+
+models:
+  - name: fct_purchase_orders
+    description: "Tabela Fato consolidada de Pedidos de Compra com recebimentos físicos, conversão cambial e indicadores de SLA de fornecedores (Lead Time)."
+    columns:
+      # --- Surrogate Keys (PK / FKs) ---
+      - name: purchase_order_sk
+        description: "Chave primária substituta (Surrogate Key) da linha do pedido de compra."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: date_sk
+        description: "Chave estrangeira apontando para dim_date referente à data de emissão do pedido (Formato YYYYMMDD)."
+        data_tests:
+          - not_null
+
+      - name: supplier_sk
+        description: "Chave estrangeira apontando para a dimensão de fornecedor (dim_suppliers)."
+        data_tests:
+          - not_null
+
+      - name: location_sk
+        description: "Chave estrangeira apontando para o local/filial de destino do pedido (dim_location)."
+        data_tests:
+          - not_null
+
+      - name: buyer_sk
+        description: "Chave estrangeira apontando para o comprador responsável (dim_employee). Pode ser nulo se não houver comprador cadastrado."
+
+      - name: goods_receipt_sk
+        description: "Chave estrangeira para o recebimento físico do pedido. Nulo se o pedido ainda não tiver sido entregue."
+
+      # --- Natural Keys / Degenerate Dimensions ---
+      - name: purchase_order_id
+        description: "ID natural do pedido de compra vindo do ERP."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: po_number
+        description: "Número operacional/fiscal do pedido de compra."
+
+      - name: supplier_id
+        description: "ID natural do fornecedor no ERP."
+        data_tests:
+          - not_null
+
+      - name: buyer_id
+        description: "ID natural do comprador responsável no ERP."
+
+      - name: destination_location_id
+        description: "ID natural do local/filial de destino no ERP."
+        data_tests:
+          - not_null
+
+      - name: goods_receipt_id
+        description: "ID natural do recebimento físico associado."
+
+      - name: received_by_employee_id
+        description: "ID natural do funcionário que recebeu os produtos no estoque."
+
+      - name: purchase_order_status
+        description: "Status do pedido de compra no ERP (ex: open, closed, cancelled)."
+        data_tests:
+          - not_null
+
+      - name: purchase_currency
+        description: "Moeda original do pedido de compra (ex: BRL, USD, EUR)."
+        data_tests:
+          - not_null
+
+      - name: receipt_status
+        description: "Status do recebimento higienizado na camada intermediate (ex: conferido, sem_nota, necessita_revisao ou pendente_de_entrega)."
+        data_tests:
+          - not_null
+
+      # --- Dates & Timestamps ---
+      - name: placed_at
+        description: "Data e hora exata da emissão do pedido de compra."
+        data_tests:
+          - not_null
+
+      - name: expected_delivery_at
+        description: "Data e hora prevista para a entrega dos produtos."
+
+      - name: received_at
+        description: "Data e hora efetiva do recebimento físico no estoque."
+
+      # --- SLA & Measures ---
+      - name: lead_time_days
+        description: "Quantidade total de dias entre a emissão do pedido e a entrega física realizada."
+
+      - name: delivery_delay_days
+        description: "Atraso em dias em relação à data esperada (Valores positivos indicam atraso na entrega)."
+
+      - name: applied_exchange_rate
+        description: "Taxa de câmbio aplicada na conversão de moedas estrangeiras para a moeda base."
+
+      - name: total_quantity_received
+        description: "Quantidade total física de itens recebidos no estoque para este pedido."
+        data_tests:
+          - not_null
+
+      - name: total_received_items
+        description: "Contagem distinta de linhas de itens recebidos no estoque."
+        data_tests:
+          - not_null
+
+      # --- Metadata ---
+      - name: ingestion_timestamp
+        description: "Timestamp de auditoria indicando quando o registro foi ingerido na pipeline."
+        data_tests:
+          - not_null

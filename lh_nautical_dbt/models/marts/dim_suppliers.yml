@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: dim_suppliers
+    description: "Tabela Dimensão com cadastro de fornecedores (nacionais e internacionais)."
+    columns:
+      - name: supplier_sk
+        description: "Chave primária substituta (Surrogate Key) do fornecedor."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: supplier_id
+        description: "Chave natural / ID original do fornecedor no ERP."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: legal_name
+        description: "Razão social do fornecedor."
+        data_tests:
+          - not_null
+
+      - name: trade_name
+        description: "Nome fantasia do fornecedor (preenchido com a Razão Social em caso de nulo)."
+        data_tests:
+          - not_null
+
+      - name: tax_id
+        description: "Documento fiscal do fornecedor (CNPJ ou VAT internacional)."
+        data_tests:
+          - not_null
+
+      - name: tax_id_type
+        description: "Tipo de documento fiscal do fornecedor."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['cnpj', 'vat']
+
+      - name: contact_name
+        description: "Nome do ponto de contato no fornecedor."
+
+      - name: email
+        description: "E-mail de contato comercial do fornecedor."
+
+      - name: phone
+        description: "Telefone de contato higienizado (apenas números)."
+
+      - name: country
+        description: "Código do país de origem do fornecedor (ex: BR, FR)."
+        data_tests:
+          - not_null
+
+      - name: is_active
+        description: "Flag indicando se o cadastro do fornecedor está ativo."
+        data_tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Timestamp de auditoria da carga de dados."
+        data_tests:
+          - not_null

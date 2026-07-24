@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: int_returns_items
+    description: "Intermediate de devoluções agrupadas por itens com regras de tratamento para devoluções canceladas."
+    columns:
+      - name: return_id
+        description: "Chave primária natural da devolução."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: return_status
+        description: "Status da devolução (cancelled, completed, open)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['cancelled', 'completed', 'open']
+
+      - name: return_reason
+        description: "Motivo da devolução padronizado sem nulos."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: 
+                - 'produto_avariado_transporte'
+                - 'item_divergente_da_descricao'
+                - 'tamanho_cor_incorreto'
+                - 'defeito_de_fabrica'
+                - 'cliente_desistiu'
+                - 'compra_duplicada'
+                - 'outros'
+                - 'nao_informado'
+
+      - name: total_returned_quantity
+        description: "Quantidade efetiva devolvida ao estoque (Zera automaticamente se o status for cancelled)."
+        data_tests:
+          - not_null
+
+      - name: total_refund_amount
+        description: "Valor efetivo reembolsado ao cliente (Zera automaticamente se o status for cancelled)."
+        data_tests:
+          - not_null

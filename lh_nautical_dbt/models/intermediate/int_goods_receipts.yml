@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: int_goods_receipts_with_items
+  - name: int_goods_receipts
     description: "Intermediate: goods receipts aggregated with items for receipt-level metrics."
     columns:
       - name: goods_receipt_id
@@ -20,7 +20,11 @@ models:
         description: "Datetime when goods were received."
 
       - name: notes
-        description: "Operational notes or comments regarding the receipt."        
+        description: "Sanitized operational notes regarding the receipt (sem_nota, conferido, necessita_revisao)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sem_nota', 'conferido', 'necessita_revisao']       
 
       - name: total_items
         description: "Count of receipt items."

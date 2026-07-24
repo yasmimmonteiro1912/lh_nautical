@@ -1,69 +1,91 @@
+-- =====================================================================
+-- Model: int_orders_items
+-- Description: Intermediate model combining sales order headers with line items
+--              at the order_item_id granularity without aggregations.
+-- =====================================================================
+
 with orders as (
-
-    select *
-    from {{ ref('stg_lh_nautical_orders') }}
-
-)
-
-, order_items as (
-
-    select *
-    from {{ ref('stg_lh_nautical_order_items') }}
-
-)
-
-, aggregated_items as (
-
     select
         order_id
-        , count(order_item_id) as total_items_count
-        , sum(quantity) as total_quantity
-        , sum(line_total) as calculated_subtotal
-    from order_items
-    group by order_id
+        , customer_id
+        , location_id
+        , salesperson_id as employee_id
+        , order_number
+        , lower(trim(status)) as order_status
+        , lower(trim(channel)) as order_channel
+        , placed_at
+        , created_at
+        , updated_at
+    from {{ ref('stg_lh_nautical_orders') }}
+),
 
-)
-
-, enriched_orders as (
-
+order_items as (
     select
-        -- Identificadores MANTIDOS COMO STRING (sem cast para int!)
-        orders.order_id
-        , orders.customer_id
-        , orders.location_id
-        , orders.order_number
+        order_item_id
+        , order_id
+        , product_variant_id
+        , quantity
+        , unit_price
+        , line_total
+        , ingestion_timestamp
+    from {{ ref('stg_lh_nautical_order_items') }}
+),
 
-        -- Atributos Padronizados
-        , lower(trim(orders.status)) as order_status
-        , lower(trim(orders.channel)) as order_channel
+enriched_items as (
+    select
+        -- Identificadores do Item e Pedido
+        ritm.order_item_id
+        , ritm.order_id
+        , ritm.product_variant_id
+        , rord.customer_id
+        , rord.location_id
+        , rord.employee_id
+        , rord.order_number
 
-        -- Flags Booleanas
-        , case 
-            when lower(trim(orders.status)) in ('cancelled', 'canceled', 'void') then true 
-            else false 
-          end as is_cancelled
+        -- Atributos e Status do Pedido
+        , rord.order_status
+        , rord.order_channel
+        , rord.order_status in (
+            'cancelled', 'canceled', 'void'
+        ) as is_cancelled
+        , rord.order_status in (
+            'completed', 'paid', 'closed', 'finished', 'confirmed'
+        ) as is_completed
 
-        , case 
-            when lower(trim(orders.status)) in ('completed', 'paid', 'closed', 'finished', 'confirmed') then true 
-            else false 
-          end as is_completed
-
-        -- Valores e Métricas
-        , cast(orders.total as decimal(14, 2)) as order_total_amount
-        , cast(orders.discount_amount as decimal(14, 2)) as discount_amount
-        , coalesce(aggregated_items.total_items_count, 0) as total_items_count
-        , coalesce(aggregated_items.total_quantity, 0) as total_quantity
+        -- Métricas Físicas e Financeiras do Item
+        , ritm.quantity
+        , ritm.unit_price
+        , ritm.line_total
 
         -- Datas
-        , orders.placed_at
-        , orders.created_at
-        , orders.updated_at
+        , rord.placed_at
+        , rord.created_at
+        , rord.updated_at
 
-    from orders
-    left join aggregated_items
-        on orders.order_id = aggregated_items.order_id
-
+        -- Metadata
+        , ritm.ingestion_timestamp
+    from order_items as ritm
+    inner join orders as rord
+        on ritm.order_id = rord.order_id
 )
 
-select *
-from enriched_orders
+select
+    order_item_id
+    , order_id
+    , product_variant_id
+    , customer_id
+    , location_id
+    , employee_id
+    , order_number
+    , order_status
+    , order_channel
+    , is_cancelled
+    , is_completed
+    , quantity
+    , unit_price
+    , line_total
+    , placed_at
+    , created_at
+    , updated_at
+    , ingestion_timestamp
+from enriched_items
