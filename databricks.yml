@@ -1,31 +1,39 @@
 bundle:
   name: grupo_2_nautical
 
+variables:
+  sql_warehouse_id:
+    description: "ID do SQL Warehouse utilizado pelas tarefas dbt"
+
 targets:
   dev:
     default: true
 
 resources:
   jobs:
-    job_ingestao_jdbc_bronze:
-      name: "[Grupo 2] Pipeline Ingestao Bronze JDBC"
+    job_pipeline_nautical_end_to_end:
+      name: "[Grupo 2] Pipeline End-to-End Nautical (Bronze, Silver & Gold)"
       
       email_notifications:
         on_failure:
           - yasmim.monteiro@indicium.ai
           - erivan.oliveira@indicium.ai
           - iasmin.santiago@indicium.ai
-     
+      
       schedule:
         quartz_cron_expression: "0 0 1 * * ?"
         timezone_id: "America/Sao_Paulo"
       
+      # Configuração do Ambiente Serverless com a dependência do dbt
       environments:
         - environment_key: serverless_env_v5
           spec:
             environment_version: "5"
+            dependencies:
+              - "dbt-databricks>=1.6.0,<2.0.0"
             
       tasks:
+        # 1. Ingestão SQL Server (Bronze)
         - task_key: rodar_ingestao_sql_server
           environment_key: serverless_env_v5
           spark_python_task:
@@ -39,12 +47,14 @@ resources:
               "--target_tables", "addresses,attributes,brands,categories,customers,employees,fiscal_invoices,goods_receipt_items,goods_receipts,locations,order_items,orders,payments,product_suppliers,product_variants,products,purchase_order_items,purchase_orders,return_items,returns,stock_levels,stock_movements,suppliers,variant_attribute_values"
             ]
 
+        # 2. Ingestão Câmbio BACEN (Bronze)
         - task_key: rodar_ingestao_cambio_bacen
           environment_key: serverless_env_v5
           spark_python_task:
             python_file: lh_nautical_bronze/src/ingestao_cambio.py
             parameters: [] 
         
+        # 3. Testes de Qualidade na Bronze
         - task_key: rodar_testes_qualidade_bronze
           environment_key: serverless_env_v5
           depends_on:
@@ -52,3 +62,18 @@ resources:
             - task_key: rodar_ingestao_cambio_bacen
           spark_python_task:
             python_file: lh_nautical_bronze/tests/test_bronze_quality.py
+
+        # 4. Transformação dbt (Silver & Gold)
+        - task_key: rodar_dbt_silver_gold
+          environment_key: serverless_env_v5
+          depends_on:
+            - task_key: rodar_testes_qualidade_bronze
+          dbt_task:
+            project_directory: lh_nautical_dbt
+            commands:
+              - "dbt deps"
+              - "dbt build"
+            warehouse_id: "${var.sql_warehouse_id}"
+            catalog: "workspace"
+            schema: "default"
+            
