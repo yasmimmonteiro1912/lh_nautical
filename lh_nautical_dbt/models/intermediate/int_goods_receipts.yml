@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: int_goods_receipts_with_items
+  - name: int_goods_receipts
     description: "Intermediate: goods receipts aggregated with items for receipt-level metrics."
     columns:
       - name: goods_receipt_id
