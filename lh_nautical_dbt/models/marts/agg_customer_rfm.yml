@@ -32,7 +32,7 @@ models:
         description: "Frequency (F): Distinct count of customer orders in the fact table."
 
       - name: lifetime_value
-        description: "Monetary (M): Total net revenue across all orders for the customer."
+        description: "Monetary (M): Total net sales amount across all orders for the customer."
 
       - name: average_ticket
         description: "Monetary (M): Average net revenue generated per order for the customer."

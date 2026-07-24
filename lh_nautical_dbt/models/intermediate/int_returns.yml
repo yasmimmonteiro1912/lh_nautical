@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: int_returns_items
+  - name: int_returns
     description: "Intermediate de devoluções agrupadas por itens com regras de tratamento para devoluções canceladas."
     columns:
       - name: return_id
