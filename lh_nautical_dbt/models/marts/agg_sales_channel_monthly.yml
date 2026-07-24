@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: agg_sales_channel_monthly
+    description: "Tabela agregada mensal do fechamento executivo de vendas por canal (E-commerce, Loja Física, B2B) e região (Estado/Cidade)."
+    columns:
+      - name: channel_monthly_sk
+        description: "Chave primária substituta da agregação (hash de month_start_date + channel + location_sk)."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: month_start_date
+        description: "Data de início do mês de referência do fechamento (ex: 2026-07-01)."
+        data_tests:
+          - not_null
+
+      - name: channel
+        description: "Canal de vendas (ex: ecommerce, pos)."
+        data_tests:
+          - not_null
+
+      - name: location_sk
+        description: "Chave estrangeira referente à filial/localização."
+        data_tests:
+          - not_null
+
+      - name: location_state
+        description: "Estado (UF) da localização/filial obtido de location_state."
+
+      - name: city
+        description: "Cidade da localização/filial."
+
+      - name: total_gross_revenue
+        description: "Receita bruta de tabela total praticada antes dos descontos."
+        data_tests:
+          - not_null
+
+      - name: total_discount_amount
+        description: "Valor monetário total de descontos concedidos."
+        data_tests:
+          - not_null
+
+      - name: total_gross_sales_amount
+        description: "Valor faturado bruto total (pós-descontos) do canal/região."
+        data_tests:
+          - not_null
+
+      - name: total_refund_amount
+        description: "Valor total reembolsado decorrente de devoluções."
+        data_tests:
+          - not_null
+
+      - name: total_net_sales_amount
+        description: "Receita líquida real do canal/região (total_gross_sales_amount - total_refund_amount)."
+        data_tests:
+          - not_null
+
+      - name: total_active_invoiced_amount
+        description: "Total monetário de vendas cobertas por Nota Fiscal eletrônica (NFe) ativa."
+        data_tests:
+          - not_null
+
+      - name: total_quantity_sold
+        description: "Quantidade total bruta de itens vendidos."
+        data_tests:
+          - not_null
+
+      - name: total_net_quantity_sold
+        description: "Quantidade líquida de itens mantidos vendidos (descontadas as devoluções)."
+        data_tests:
+          - not_null
+
+      - name: total_orders_count
+        description: "Quantidade total de pedidos únicos realizados no canal/região no mês."
+        data_tests:
+          - not_null
+
+      - name: average_discount_percentage
+        description: "Percentual médio de desconto aplicado sobre a receita de tabela (total_discount / total_gross_revenue * 100)."
+
+      - name: aggregated_at
+        description: "Timestamp de execução da carga da tabela agregada."
+        data_tests:
+          - not_null
