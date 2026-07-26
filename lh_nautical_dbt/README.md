@@ -20,6 +20,8 @@ A pasta `lh_nautical_dbt` é isolada e dedicada exclusivamente aos modelos, test
 
 O deploy automatizado é executado pelo `bitbucket-pipelines.yml`, também na raiz, que valida e publica o bundle no Databricks a cada atualização na branch `main`.
 
+---
+
 ## Estrutura do Projeto
 
 ```text
