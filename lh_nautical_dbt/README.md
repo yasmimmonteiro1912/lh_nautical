@@ -12,6 +12,14 @@ Principais características:
 
 ---
 
+## Orquestração, Deploy e CI/CD
+
+A orquestração do pipeline diário (fuso `America/Sao_Paulo`) e os recursos do Databricks são gerenciados via `databricks.yml`, localizado na **raiz do repositório** (fora da pasta `lh_nautical_dbt`).
+
+A pasta `lh_nautical_dbt` é isolada e dedicada exclusivamente aos modelos, testes e documentação de transformação dbt.
+
+O deploy automatizado é executado pelo `bitbucket-pipelines.yml`, também na raiz, que valida e publica o bundle no Databricks a cada atualização na branch `main`.
+
 ## Estrutura do Projeto
 
 ```text
