@@ -1,0 +1,98 @@
+version: 2
+
+models:
+  - name: agg_inventory_idle_stock
+    description: >
+      Point-in-time aggregate model identifying idle stock — SKUs without
+      a sale for 90+ days — and the capital value tied up in them. Grain:
+      one row per variant_sk + location_sk, reflecting the most recent
+      inventory snapshot and the last recorded sale movement.
+    columns:
+      - name: inventory_idle_sk
+        description: Surrogate key generated from variant_sk and location_sk.
+        tests:
+          - unique
+          - not_null
+
+      - name: variant_sk
+        description: Surrogate key of the product variant.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_products')
+              field: variant_sk
+
+      - name: location_sk
+        description: Surrogate key of the location.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_sk
+
+      - name: product_variant_id
+        description: Business/natural key of the product variant.
+        tests:
+          - not_null
+
+      - name: location_id
+        description: Business/natural key of the location.
+        tests:
+          - not_null
+
+      - name: current_quantity_on_hand
+        description: Quantity on hand from the most recent inventory snapshot.
+        tests:
+          - not_null
+
+      - name: current_stock_value_estimated
+        description: Estimated stock value from the most recent inventory snapshot.
+        tests:
+          - not_null
+
+      - name: last_sale_date
+        description: >
+          Most recent date this variant/location had a movement classified
+          as "Venda". Null if the SKU has never sold.
+
+      - name: reference_date
+        description: >
+          Global reference date used to calculate days_since_last_sale —
+          the most recent sale date across the entire dataset. Constant
+          across all rows.
+        tests:
+          - not_null
+
+      - name: days_since_last_sale
+        description: >
+          Number of days between last_sale_date and reference_date. Null
+          when the SKU has never sold (see is_never_sold).
+
+      - name: is_never_sold
+        description: Flag indicating the variant/location has no recorded sale.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+
+      - name: is_idle_90d
+        description: >
+          Flag indicating the variant/location is idle — no sale in 90+
+          days, or never sold. Threshold is currently hardcoded at 90 days.
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+
+      - name: idle_capital_amount
+        description: >
+          Estimated stock value tied up in idle inventory. Equals
+          current_stock_value_estimated when is_idle_90d is true, 0
+          otherwise.
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: Timestamp of model execution, for audit purposes.
+        tests:
+          - not_null
