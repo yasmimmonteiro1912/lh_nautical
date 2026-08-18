@@ -1,89 +1,69 @@
 -- =====================================================================
--- Model: fct_order_payments
--- Description: Fact table recording order payments, payment methods,
---              amounts, and foreign surrogate keys for dimensions.
+-- Model: agg_order_payments_summary
+-- Layer: Gold / Marts
+-- Description: One row per order_id, aggregating installment payments
+--              and comparing total paid vs total items sold (Dor II).
 -- =====================================================================
 
 with payments as (
-    select * from {{ ref('stg_lh_nautical_payments') }}
+    select * from {{ ref('fct_order_payments') }}
 ),
 
-orders_summary as (
-    -- Agrupamos para garantir 1 linha por order_id e evitar duplicar pagamentos
+-- 1. Agrupamos o valor total dos itens vendidos por pedido
+order_items_summary as (
+    select
+        order_id
+        , sum(quantity * unit_price) as total_items_amount
+    from {{ ref('int_orders_with_items') }}
+    group by order_id
+),
+
+aggregated_payments as (
     select
         order_id
         , customer_id
-        , is_cancelled
-    from {{ ref('int_orders_with_items') }}
+        , customer_sk
+        , count(payment_id) as installment_count
+        , sum(payment_amount) as total_paid_amount
+        , min(paid_at) as first_payment_date
+        , max(paid_at) as last_payment_date
+        , count(distinct payment_method) as distinct_payment_methods
+    from payments
     group by
         order_id
         , customer_id
-        , is_cancelled
+        , customer_sk
 ),
 
-joined_payments as (
+final_model as (
     select
-        pym.payment_id
-        , pym.order_id
-        , ord.customer_id
-        , lower(trim(pym.payment_method)) as payment_method
-        , cast(pym.payment_amount as decimal(14, 2)) as payment_amount
-        , pym.paid_at
-        , pym.ingestion_timestamp
-    from payments as pym
-    left join orders_summary as ord
-        on pym.order_id = ord.order_id
-    where coalesce(ord.is_cancelled, false) = false
-),
+        -- Identificadores e Chaves
+        pay.order_id
+        , pay.customer_id
+        , pay.customer_sk
+        , {{ dbt_utils.generate_surrogate_key(['pay.order_id']) }}
+            as order_payment_summary_sk
 
-calculated_sks as (
-    select
-        -- 1. Colunas puras primeiro (Regra ST06)
-        payment_id
-        , order_id
-        , customer_id
-        , payment_method
-        , payment_amount
-        , paid_at
-        , ingestion_timestamp
+        -- Métricas de Pagamento
+        , pay.installment_count
+        , pay.total_paid_amount
+        , coalesce(itm.total_items_amount, 0) as total_items_amount
+        , pay.first_payment_date
+        , pay.last_payment_date
+        , pay.distinct_payment_methods
+        , pay.installment_count > 1 as is_installment
 
-        -- 2. Geração das Chaves para o Star Schema
-        , {{ dbt_utils.generate_surrogate_key([
-            'payment_id'
-        ]) }} as payment_sk
+        -- Flag da Dor II: Identifica divergência real entre o valor pago e o valor dos itens (> R$ 1,00)
+        , case 
+            when abs(pay.total_paid_amount - coalesce(itm.total_items_amount, 0)) > 1.00 then true 
+            else false 
+          end as is_payment_divergent
 
-        , case
-            when customer_id is not null
-                then {{ dbt_utils.generate_surrogate_key([
-                    'customer_id'
-                ]) }}
-        end as customer_sk
-
-        -- Date SK numérica YYYYMMDD com tratamento para data nula
-        , coalesce(
-            cast(date_format(paid_at, 'yyyyMMdd') as int)
-            , -1
-        ) as date_sk
-    from joined_payments
+        -- Timestamp de Auditoria
+        , current_timestamp() as ingestion_timestamp
+    from aggregated_payments as pay
+    left join order_items_summary as itm
+        on pay.order_id = itm.order_id
 )
 
--- 3. SELECT final organizado
-select
-    -- Primary & Foreign Keys
-    payment_sk
-    , date_sk
-    , customer_sk
-
-    -- Natural Keys & Degenerate Dimensions
-    , payment_id
-    , order_id
-    , customer_id
-    , payment_method
-
-    -- Measures
-    , payment_amount
-
-    -- Dates & Metadata
-    , paid_at
-    , ingestion_timestamp
-from calculated_sks
+select * from final_model

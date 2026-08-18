@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: agg_order_payments_summary
+    description: "Tabela agregada na granularidade de pedido (1 linha por order_id) na camada Marts/Gold. Consolida pagamentos parcelados e compara o total pago com o valor dos itens vendidos para detectar divergências financeiras (Dor II)."
+    columns:
+      - name: order_payment_summary_sk
+        description: "Chave substituta (Surrogate Key) primária do modelo, gerada a partir do order_id."
+        tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        description: "Identificador natural e único do pedido."
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Identificador natural do cliente."
+
+      - name: customer_sk
+        description: "Chave substituta (Surrogate Key) da dimensão de clientes."
+
+      - name: installment_count
+        description: "Quantidade total de transações ou parcelas registradas para o pedido."
+
+      - name: total_paid_amount
+        description: "Soma total do valor efetivamente pago no pedido (em R$)."
+
+      - name: total_items_amount
+        description: "Soma total do valor bruto dos itens vendidos no pedido (quantidade * preço unitário em R$)."
+
+      - name: first_payment_date
+        description: "Data e hora do primeiro pagamento registrado para o pedido."
+
+      - name: last_payment_date
+        description: "Data e hora do último pagamento registrado para o pedido."
+
+      - name: distinct_payment_methods
+        description: "Contagem de métodos de pagamento distintos utilizados no pedido."
+
+      - name: is_installment
+        description: "Flag booleana indicando se o pedido foi pago em mais de uma parcela (TRUE/FALSE)."
+
+      - name: is_payment_divergent
+        description: "Flag booleana da Dor II. Indica se há divergência maior que R$ 1,00 entre o valor pago e o valor total dos itens (TRUE/FALSE)."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Timestamp de auditoria da geração do registro no Databricks."

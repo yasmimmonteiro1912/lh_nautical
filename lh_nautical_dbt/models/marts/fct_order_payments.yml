@@ -49,3 +49,6 @@ models:
         description: "Timestamp de auditoria da carga do registro."
         data_tests:
           - not_null
+      
+      - name: is_payment_divergent
+        description: "Flag que identifica divergência > R$ 1,00 entre o valor pago e o valor dos itens."

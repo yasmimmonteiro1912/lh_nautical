@@ -25,12 +25,26 @@ name_corrections as (
     select * from {{ ref('product_name_corrections') }}
 ),
 
+-- Agrega os prefixos válidos em um array (1 única linha) para checar via exists(),
+-- evitando fanout que um join direto por "like" causaria
+valid_prefixes as (
+    select collect_list(prefix) as prefixes 
+    from {{ ref('is_valid_product_name') }}
+),
+
 joined_data as (
     select
         vnt.product_variant_id
         , vnt.product_id
         -- Correção de erros de digitação conhecidos no nome do produto
-        , coalesce(corr.corrected_name, prd.product_name) as product_name
+        -- Match por prefixo (não igualdade exata), pois product_name tem sufixo numérico (ex: "Caboo Náutico 4942")
+        , case
+            when prd.product_name like corr.typo || '%'
+                then concat(corr.corrected_name, substring(prd.product_name, length(corr.typo) + 1))
+            else prd.product_name
+          end as product_name
+        -- Flag: nome do produto começa com algum prefixo reconhecido como válido
+        , exists(vp.prefixes, p -> prd.product_name like concat(p, '%')) as is_valid_product_name
         , vnt.sku as variant_name
         , brd.brand_name
         , cat.category_name
@@ -58,7 +72,9 @@ joined_data as (
     left join preferred_suppliers as sup 
         on vnt.product_variant_id = sup.product_variant_id
     left join name_corrections as corr
-        on trim(prd.product_name) = corr.typo
+        on prd.product_name like corr.typo || '%'
+    -- cross join seguro: valid_prefixes sempre tem exatamente 1 linha
+    cross join valid_prefixes as vp
 )
 
 select * from joined_data
