@@ -21,11 +21,16 @@ preferred_suppliers as (
     where is_preferred = true
 ),
 
+name_corrections as (
+    select * from {{ ref('product_name_corrections') }}
+),
+
 joined_data as (
     select
         vnt.product_variant_id
         , vnt.product_id
-        , prd.product_name
+        -- Correção de erros de digitação conhecidos no nome do produto
+        , coalesce(corr.corrected_name, prd.product_name) as product_name
         , vnt.sku as variant_name
         , brd.brand_name
         , cat.category_name
@@ -52,6 +57,8 @@ joined_data as (
         on cat.parent_category_id = pcat.category_id
     left join preferred_suppliers as sup 
         on vnt.product_variant_id = sup.product_variant_id
+    left join name_corrections as corr
+        on trim(prd.product_name) = corr.typo
 )
 
 select * from joined_data
