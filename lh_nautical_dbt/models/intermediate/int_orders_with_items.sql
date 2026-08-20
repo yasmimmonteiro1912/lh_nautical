@@ -13,6 +13,8 @@ with orders as (
         , order_number
         , lower(trim(status)) as order_status
         , lower(trim(channel)) as order_channel
+        , subtotal as order_subtotal
+        , discount_amount as order_discount_amount
         , placed_at
         , created_at
         , updated_at
@@ -41,6 +43,8 @@ enriched_items as (
         , rord.location_id
         , rord.employee_id
         , rord.order_number
+        , rord.order_subtotal
+        , rord.order_discount_amount
 
         -- Atributos e Status do Pedido
         , rord.order_status
@@ -77,6 +81,8 @@ select
     , location_id
     , employee_id
     , order_number
+    , order_subtotal
+    , order_discount_amount
     , order_status
     , order_channel
     , is_cancelled
