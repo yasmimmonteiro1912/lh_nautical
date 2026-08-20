@@ -39,6 +39,10 @@ joined_data as (
         , itm.unit_price
         , itm.line_total
 
+        -- Métricas do pedido, para rateio do desconto
+        , itm.order_subtotal
+        , itm.order_discount_amount
+
         -- Métricas de Devolução (Consumidas da int_returns_with_items)
         , coalesce(retn.returned_quantity, 0) as returned_quantity
         , coalesce(retn.refund_amount, 0) as refund_amount
@@ -85,8 +89,8 @@ calculated_metrics_and_sks as (
         , (quantity * unit_price) as gross_revenue
         , line_total as gross_sales_amount
         , coalesce(
-            (quantity * unit_price) - line_total, 0
-        ) as discount_amount
+            (line_total / nullif(order_subtotal, 0)) * order_discount_amount
+        , 0) as discount_amount
         , (quantity - returned_quantity) as net_quantity
         , (line_total - refund_amount) as net_sales_amount
 
