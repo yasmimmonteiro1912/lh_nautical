@@ -10,7 +10,13 @@ prepared_data as (
     select
         cor.product_variant_id
         , cor.product_id
-        , cor.product_name
+        -- Produtos com nome inválido/placeholder (ex: "Cliente Genérico", "TBD") recebem rótulo genérico
+        -- em vez de serem descartados, preservando a linha para o estoque associado a eles
+        , case
+            when cor.is_valid_product_name then cor.product_name
+            else 'Produto Não Identificado'
+          end as product_name
+        , cor.is_valid_product_name
         , cor.variant_name
         , cor.brand_name
         , cor.category_name
@@ -33,7 +39,7 @@ prepared_data as (
         , att.attribute_weight_kg
         , att.is_waterproof
         , att.product_material
-        
+
         -- 2. Cálculos, funções e transformações ficam por último na CTE
         , md5(cast(cor.product_variant_id as string)) as variant_sk
         , case
@@ -42,7 +48,7 @@ prepared_data as (
             else cor.ingestion_timestamp
         end as ingestion_timestamp
     from core_variants as cor
-    left join pivoted_attributes as att 
+    left join pivoted_attributes as att
         on cor.product_variant_id = att.product_variant_id
 )
 
@@ -52,6 +58,7 @@ select
     , product_variant_id
     , product_id
     , product_name
+    , is_valid_product_name
     , variant_name
     , brand_name
     , category_name

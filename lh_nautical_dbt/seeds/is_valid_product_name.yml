@@ -1,0 +1,17 @@
+version: 2
+
+seeds:
+  - name: product_name_corrections
+    description: >
+      Mapeamento manual de erros de digitação conhecidos em product_name,
+      usado para corrigir o dado na camada intermediária antes de virar
+      dimensão final.
+    columns:
+      - name: typo
+        description: Valor incorreto encontrado na origem.
+        tests:
+          - not_null
+      - name: corrected_name
+        description: Valor correto a ser usado.
+        tests:
+          - not_null

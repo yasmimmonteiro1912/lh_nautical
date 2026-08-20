@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: agg_order_payments_summary
+    description: >
+      Order-level aggregate of payments, one row per order_id. Use this
+      model (not fct_order_payments directly) when joining payment data
+      to other fact tables at order grain, to avoid cartesian duplication
+      from installment payments.
+    columns:
+      - name: order_payment_summary_sk
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+      - name: total_paid_amount
+        tests:
+          - not_null
+      - name: is_installment
+        tests:
+          - not_null
