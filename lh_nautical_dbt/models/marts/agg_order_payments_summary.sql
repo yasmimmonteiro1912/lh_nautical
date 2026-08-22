@@ -1,11 +1,3 @@
--- =====================================================================
--- Model: agg_order_payments_summary
--- Layer: Gold / Marts
--- Description: One row per order_id, aggregating installment payments.
---              Prevents cartesian duplication when joined with fact
---              tables at order grain (e.g. fct_sales_items).
--- =====================================================================
-
 with payments as (
     select * from {{ ref('fct_order_payments') }}
 ),
@@ -20,11 +12,23 @@ aggregated as (
         , min(paid_at) as first_payment_date
         , max(paid_at) as last_payment_date
         , count(distinct payment_method) as distinct_payment_methods
+        , string_agg(distinct payment_method, ', ') as payment_methods_used
     from payments
     group by
         order_id
         , customer_id
         , customer_sk
+),
+
+primary_method as (
+    select
+        order_id
+        , payment_method as primary_payment_method
+    from payments
+    qualify row_number() over (
+        partition by order_id
+        order by paid_at asc
+    ) = 1
 ),
 
 order_items_summary as (
@@ -46,6 +50,8 @@ final_model as (
         , pay.first_payment_date
         , pay.last_payment_date
         , pay.distinct_payment_methods
+        , pay.payment_methods_used
+        , pm.primary_payment_method
         , pay.installment_count > 1 as is_installment
 
         -- 2. Primary Surrogate Key
@@ -61,6 +67,8 @@ final_model as (
         -- 3. Timestamp de Auditoria
         , current_timestamp() as ingestion_timestamp
     from aggregated as pay
+    left join primary_method as pm
+        on pay.order_id = pm.order_id
     left join order_items_summary as itm
         on pay.order_id = itm.order_id
 )
