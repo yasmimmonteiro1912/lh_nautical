@@ -15,9 +15,8 @@ categories as (
 ),
 
 preferred_suppliers as (
-    select * 
+    select *
     from {{ ref('stg_lh_nautical_product_suppliers') }}
-    -- Filtro estratégico para garantir granularidade de 1 linha por SKU
     where is_preferred = true
 ),
 
@@ -25,30 +24,47 @@ name_corrections as (
     select * from {{ ref('product_name_corrections') }}
 ),
 
--- Agrega os prefixos válidos em um array (1 única linha) para checar via exists(),
--- evitando fanout que um join direto por "like" causaria
 valid_prefixes as (
-    select collect_list(prefix) as prefixes 
+    select collect_list(prefix) as prefixes
     from {{ ref('is_valid_product_name') }}
+),
+
+-- Resolve qual correção usar ANTES de aplicar, pegando o match mais
+-- específico (typo mais longo) para evitar fanout quando mais de um
+-- typo bate como prefixo do mesmo product_name
+matched_corrections as (
+    select
+        prd.product_id
+        , corr.typo
+        , corr.corrected_name
+        , row_number() over (
+            partition by prd.product_id
+            order by length(corr.typo) desc
+        ) as rn
+    from products as prd
+    inner join name_corrections as corr
+        on prd.product_name like corr.typo || '%'
+),
+
+best_correction as (
+    select product_id, typo, corrected_name
+    from matched_corrections
+    where rn = 1
 ),
 
 joined_data as (
     select
         vnt.product_variant_id
         , vnt.product_id
-        -- Correção de erros de digitação conhecidos no nome do produto
-        -- Match por prefixo (não igualdade exata), pois product_name tem sufixo numérico (ex: "Caboo Náutico 4942")
+        -- Nome já corrigido, aplicado ANTES da checagem de validade
         , case
-            when prd.product_name like corr.typo || '%'
-                then concat(corr.corrected_name, substring(prd.product_name, length(corr.typo) + 1))
+            when bc.typo is not null
+                then concat(bc.corrected_name, substring(prd.product_name, length(bc.typo) + 1))
             else prd.product_name
           end as product_name
-        -- Flag: nome do produto começa com algum prefixo reconhecido como válido
-        , exists(vp.prefixes, p -> prd.product_name like concat(p, '%')) as is_valid_product_name
         , vnt.sku as variant_name
         , brd.brand_name
         , cat.category_name
-        -- Buscamos o nome da categoria pai através da tabela 'pcat'
         , pcat.category_name as parent_category_name
         , vnt.sku
         , vnt.barcode_ean
@@ -60,21 +76,27 @@ joined_data as (
         , sup.lead_time_days as preferred_supplier_lead_time
         , vnt.ingestion_timestamp
     from variants as vnt
-    left join products as prd 
+    left join products as prd
         on vnt.product_id = prd.product_id
-    left join brands as brd 
+    left join brands as brd
         on prd.brand_id = brd.brand_id
-    left join categories as cat 
+    left join categories as cat
         on prd.category_id = cat.category_id
-    -- Self-join para descobrir quem é o pai da categoria atual
-    left join categories as pcat 
+    left join categories as pcat
         on cat.parent_category_id = pcat.category_id
-    left join preferred_suppliers as sup 
+    left join preferred_suppliers as sup
         on vnt.product_variant_id = sup.product_variant_id
-    left join name_corrections as corr
-        on prd.product_name like corr.typo || '%'
-    -- cross join seguro: valid_prefixes sempre tem exatamente 1 linha
+    left join best_correction as bc
+        on prd.product_id = bc.product_id
+),
+
+final as (
+    select
+        jd.*
+        -- Validade checada sobre o nome JÁ CORRIGIDO
+        , exists(vp.prefixes, p -> jd.product_name like concat(p, '%')) as is_valid_product_name
+    from joined_data as jd
     cross join valid_prefixes as vp
 )
 
-select * from joined_data
+select * from final
