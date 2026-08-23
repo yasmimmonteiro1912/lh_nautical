@@ -82,4 +82,4 @@ Landing page interativa para direcionamento de perfil de usuário e atalhos de n
 
 ## 📜 Licença e Governança
 
-Projeto desenvolvido como parte do programa de formação corporativa da **Indicium AI** (LH20
+Projeto desenvolvido como parte do programa de formação corporativa da **Indicium AI** (LH2026.05)
