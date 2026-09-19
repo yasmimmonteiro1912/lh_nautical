@@ -1,6 +1,9 @@
 bundle:
   name: grupo_2_nautical
 
+include:
+  - resources/*.yml
+
 variables:
   sql_warehouse_id:
     description: "ID do SQL Warehouse utilizado pelas tarefas dbt"
