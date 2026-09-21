@@ -1,13 +1,26 @@
 
-# ⚓ Pipeline de Ingestão LH Nautical - Camada Bronze 🚀
+# ⚓ LH Nautical — Data Platform End-to-End 🚀
 
-Este repositório contém a infraestrutura como código (IaC) e os scripts de engenharia de dados necessários para orquestrar e executar a ingestão automatizada de dados para a **Camada Bronze** do Delta Lake da **LH Nautical**. 
+Este repositório contém a infraestrutura como código (IaC) e os scripts de engenharia de dados necessários para orquestrar e executar a **plataforma de dados completa** da **LH Nautical**, desde a ingestão automatizada na **Camada Bronze** até a transformação em **dbt**, visualização em **Power BI**, análise preditiva e um **assistente de IA baseado em RAG**.
 
-O projeto utiliza **PySpark** para processamento distribuído, **Databricks Asset Bundles (DABs)** para gerenciamento de recursos em nuvem e **Bitbucket Pipelines** para garantir a entrega contínua (CI/CD).
+A solução utiliza **PySpark** para processamento distribuído, **Databricks Asset Bundles (DABs)** para gerenciamento de recursos em nuvem, **dbt** para transformações nas camadas Silver e Gold, **Bitbucket Pipelines** para entrega contínua (CI/CD), **Power BI** para visualização de dados, **MLflow** para modelagem preditiva e **RAG (Retrieval-Augmented Generation)** para o assistente de IA.
 
 ---
 
 ## 🏗️ Arquitetura e Componentes do Projeto
+
+A plataforma de dados da LH Nautical segue a arquitetura **Medallion** (Bronze → Silver → Gold) e engloba os seguintes blocos:
+
+| Camada / Componente | Tecnologia | Descrição |
+| :--- | :--- | :--- |
+| **Bronze** | PySpark + DABs | Ingestão automatizada de dados do SQL Server e API do Banco Central |
+| **Silver** | dbt (Databricks adapter) | Limpeza, padronização e enriquecimento dos dados |
+| **Gold** | dbt (Databricks adapter) | Modelagem dimensional voltada para análise e consumo |
+| **Orquestração** | Databricks Workflows (DABs) | Agendamento e encadeamento de tarefas |
+| **Qualidade de Dados** | PySpark + Testes automatizados | Barreira de segurança entre camadas |
+| **Visualização** | Power BI | Dashboards interativos para o negócio |
+| **Análise Preditiva** | Databricks Notebooks + PySpark | Modelos de forecast para demanda e receita |
+| **Assistente de IA** | RAG (Retrieval-Augmented Generation) | Chatbot que responde perguntas sobre os dados da plataforma |
 
 O ecossistema de ingestão é dividido em duas fontes principais de dados, ambas configuradas para salvar os dados no formato Delta com suporte a evolução de esquema (`mergeSchema`).
 
@@ -40,7 +53,7 @@ O arquivo `databricks.yml` declara o workflow e os recursos necessários para o 
 * **Agendamento (Cron):** Executado diariamente às **01:00 AM** (Horário de Brasília - `America/Sao_Paulo`).
 * **Observabilidade:** Alertas de e-mail automatizados configurados para disparar **em caso de falha** (`on_failure`) para o time de engenharia responsável:
   * `yasmim.monteiro@indicium.ai`
-  * `erivan.oliveira@indicium.ai`
+  * `caua.braga@indicium.ai`
   * `iasmin.santiago@indicium.ai`
 
 ### Sequência de Tarefas (Tasks)
@@ -92,6 +105,130 @@ A automação de deploy é gerenciada pelo **Bitbucket Pipelines** (`bitbucket-p
 
 ---
 
+## 🥈 Transformação de Dados com dbt (Camadas Silver e Gold)
+
+Após a ingestão na Camada Bronze, os dados são transformados e modelados utilizando **dbt** com o adaptador do Databricks (`dbt-databricks`). As transformações são versionadas, testadas e documentadas como código.
+
+### Camada Silver — Limpeza e Padronização
+
+* **Arquivo base:** `dbt_lh_nautical/models/silver/`
+* **Objetivo:** Aplicar regras de limpeza, padronização de tipos, remoção de duplicidades e normalização de nomes de colunas.
+* **Características:**
+  * Conversão de tipos de dados para formatos canônicos.
+  * Tratamento de nulos e valores sentinelas.
+  * Padronização de nomenclatura (`snake_case`).
+  * Deduplicação via `row_number()` ou `qualify`.
+
+### Camada Gold — Modelagem Dimensional
+
+* **Arquivo base:** `dbt_lh_nautical/models/gold/`
+* **Objetivo:** Construir o modelo dimensional (Star Schema) voltado para consumo analítico e BI.
+* **Características:**
+  * Criação de tabelas dimensão (`dim_*`) e fato (`fct_*`).
+  * Aplicação de regras de negócio e métricas derivadas.
+  * Materialização como tabelas Delta otimizadas no Databricks.
+
+### Testes e Documentação dbt
+
+* **Schema tests:** `unique`, `not_null`, `relationships` e testes customizados em Python/YAML.
+* **Documentação:** `dbt docs generate` gera a documentação automática do lineage e das descrições de cada modelo.
+* **Execução:**
+  ```bash
+  dbt deps
+  dbt run --profiles-dir .
+  dbt test --profiles-dir .
+  dbt docs generate --profiles-dir .
+  ```
+
+---
+
+## 📊 Visualização de Dados no Power BI
+
+A camada Gold é consumida diretamente pelo **Power BI** através do conector nativo do Databricks (ou via Unity Catalog), disponibilizando dashboards interativos para a área de negócio.
+
+### Dashboards Construídos
+
+* **Visão Geral de Vendas:** KPIs de faturamento, volume de pedidos e ticket médio ao longo do tempo.
+* **Análise de Câmbio:** Cotações do dólar com filtros por período e comparação de médias móveis.
+* **Desempenho Operacional:** Indicadores de eficiência por região, categoria e canal de venda.
+* **Governança e Qualidade:** Painel de monitoramento da volumetria das tabelas e status dos pipelines de ingestão.
+
+### Características Técnicas
+
+* **Atualização:** Agendamento de refresh automático sincronizado com o término do pipeline Gold.
+* **Segurança:** Row-Level Security (RLS) configurada via Unity Catalog para garantir acesso granular por perfil de usuário.
+* **Conexão:** DirectQuery ou Import Mode, conforme requisito de latência de cada dashboard.
+
+---
+
+## 📈 Análise Preditiva
+
+A plataforma conta com modelos de **análise preditiva** desenvolvidos em PySpark e rastreados via **MLflow**, integrados ao pipeline de dados para gerar previsões automatizadas.
+
+### Modelos Desenvolvidos
+
+| Modelo | Finalidade | Algoritmo |
+| :--- | :--- | :--- |
+| **Forecast de Receita** | Previsão de faturamento mensal/trimestral | Séries temporais / Regressão |
+| **Previsão de Demanda** | Estimativa de volume de pedidos por categoria | Regressão / Gradient Boosting |
+
+### Fluxo do Pipeline Preditivo
+
+1. **Extração de Features:** Leitura das tabelas Gold via Spark DataFrame.
+2. **Treinamento:** Treino do modelo e logging de parâmetros, métricas e artefatos no MLflow.
+3. **Inferência:** Aplicação do modelo em lote (`batch inference`) e escrita dos resultados em uma tabela de previsões (`gold.previsoes_*`).
+4. **Monitoramento:** Versionamento de modelos no MLflow Model Registry e comparação de versões.
+
+### Arquivos Relevantes
+
+* `src/ml/forecast_receita.py` — Treinamento e inferência do forecast de receita.
+* `src/ml/previsao_demanda.py` — Treinamento e inferência do modelo de demanda.
+* `src/ml/utils.py` — Funções de feature engineering e métricas de avaliação.
+
+---
+
+## 🤖 Assistente de IA com RAG (Retrieval-Augmented Generation)
+
+A solução inclui um **assistente de IA baseado em RAG** que permite aos usuários do negócio fazer perguntas em linguagem natural sobre os dados da plataforma e receber respostas contextualizadas.
+
+### Arquitetura do RAG
+
+1. **Indexação:** Os metadados das tabelas Gold (esquemas, descrições de colunas, dicionário de dados e dashboards) são indexados em um **Vector Search Index** no Databricks.
+2. **Embeddings:** Geração de embeddings a partir da documentação semântica dos dados, utilizando modelos de embedding do Databricks Foundation Model APIs.
+3. **Retrieval:** Quando o usuário faz uma pergunta, o sistema converte a query em embedding e recupera os trechos mais relevantes do índice via busca de similaridade.
+4. **Geração:** Os trechos recuperados são injetados no prompt de um LLM (Foundation Model) que gera a resposta final em linguagem natural.
+
+### Capacidades do Assistente
+
+* 📋 **Q&A sobre dados:** Responde perguntas como "Qual foi o faturamento do último trimestre?" ou "Qual a categoria com maior volume de pedidos?".
+* 🔍 **Exploração de esquema:** Descreve tabelas, colunas e relacionamentos disponíveis na camada Gold.
+* 📊 **Geração de SQL:** Pode sugerir queries SQL com base na pergunta do usuário e no esquema das tabelas.
+* 📈 **Interpretação de métricas:** Explica KPIs e métricas calculadas nos dashboards.
+
+### Arquivos Relevantes
+
+* `src/rag/indexacao_vector_search.py` — Criação e atualização do índice Vector Search.
+* `src/rag/assistant_rag.py` — Lógica de retrieval + geração de respostas.
+* `src/rag/config.yaml` — Configuração de modelos de embedding, LLM e parâmetros de busca.
+
+---
+
+## 🗺️ Visão Geral do Fluxo de Dados
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌──────────────┐     ┌───────────────┐
+│   Fontes     │     │   Bronze     │     │   Silver     │     │    Gold      │     │  Consumo      │
+│             │     │             │     │             │     │             │     │               │
+│ SQL Server  │────▶│ Ingestão    │────▶│ dbt: limpeza│────▶│ dbt: star   │────▶│ Power BI      │
+│ API Bacen   │────▶│ PySpark     │     │ padronização│     │ schema      │     │ Análise       │
+│             │     │ DABs        │     │             │     │             │     │ Preditiva     │
+└─────────────┘     └─────────────┘     └─────────────┘     └──────┬──────┘     │ Assistente    │
+                                                                   │            │ IA (RAG)      │
+                                                                   └────────────▶└───────────────┘
+```
+
+---
+
 ## 📋 Pré-requisitos para Execução Local / Desenvolvimento
 
 Caso queira debugar os scripts localmente através do seu ambiente de desenvolvimento ou terminal, garanta os seguintes requisitos:
@@ -100,3 +237,47 @@ Caso queira debugar os scripts localmente através do seu ambiente de desenvolvi
 * Instalação do PySpark (`pip install pyspark`).
 * Driver JDBC do SQL Server configurado no ambiente de execução do Spark.
 * CLI do Databricks autenticada localmente para testes com Bundles.
+* **dbt** instalado com o adaptador do Databricks: `pip install dbt-databricks`.
+* **Power BI Desktop** (para edição e publicação de relatórios locais).
+* **MLflow** instalado (`pip install mlflow`) para rastreamento de modelos preditivos.
+* Acesso ao **Vector Search** e às **Foundation Model APIs** do Databricks para o assistente RAG.
+
+---
+
+## 📁 Estrutura de Diretórios
+
+```
+lh-nautical/
+├── src/
+│   ├── bronze/
+│   │   ├── ingestao_cambio.py
+│   │   └── ingestao_tabelas.py
+│   ├── ml/
+│   │   ├── forecast_receita.py
+│   │   ├── previsao_demanda.py
+│   │   └── utils.py
+│   └── rag/
+│       ├── indexacao_vector_search.py
+│       ├── assistant_rag.py
+│       └── config.yaml
+├── dbt_lh_nautical/
+│   ├── models/
+│   │   ├── silver/
+│   │   └── gold/
+│   ├── dbt_project.yml
+│   └── profiles.yml
+├── tests/
+│   └── test_bronze_quality.py
+├── databricks.yml
+├── bitbucket-pipelines.yml
+└── README.md
+```
+
+---
+
+## 🚀 Roadmap e Próximos Passos
+
+* [ ] Expansão das fontes de ingestão (APIs de terceiros, SFTP).
+* [ ] Modelos preditivos adicionais (churn, otimização de estoque).
+* [ ] Integração do assistente RAG com canais de Teams/Slack.
+* [ ] Governança automatizada de dados com Unity Catalog tags e linhagem end-to-end.
