@@ -19,9 +19,7 @@ resources:
       
       email_notifications:
         on_failure:
-          - yasmim.monteiro@indicium.ai
-          - erivan.oliveira@indicium.ai
-          - iasmin.santiago@indicium.ai
+          - yasmimmonteiro1912@gmail.com
       
       schedule:
         quartz_cron_expression: "0 0 1 * * ?"

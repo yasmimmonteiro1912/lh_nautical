@@ -51,10 +51,7 @@ O arquivo `databricks.yml` declara o workflow e os recursos necessários para o 
 ### Detalhes do Workflow: `[Grupo 2] Pipeline Ingestao Bronze JDBC`
 
 * **Agendamento (Cron):** Executado diariamente às **01:00 AM** (Horário de Brasília - `America/Sao_Paulo`).
-* **Observabilidade:** Alertas de e-mail automatizados configurados para disparar **em caso de falha** (`on_failure`) para o time de engenharia responsável:
-  * `yasmim.monteiro@indicium.ai`
-  * `caua.braga@indicium.ai`
-  * `iasmin.santiago@indicium.ai`
+* **Observabilidade:** Alertas de e-mail automatizados configurados para disparar **em caso de falha** (`on_failure`) para o time de engenharia responsável.
 
 ### Sequência de Tarefas (Tasks)
 
